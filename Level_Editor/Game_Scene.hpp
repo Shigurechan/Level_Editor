@@ -2,10 +2,11 @@
 #define ___GAME_SCENE_HPP_
 
 #include "Scene_base.hpp"
-
 #include "Entry.hpp"
 
 class Stage;
+class Entry;
+class Control;
 enum class Scene_Type;
 /*####################################################
 * メインゲーム　シーン
@@ -26,7 +27,8 @@ private:
 
 
 
-	std::shared_ptr<Stage> stage;
+	std::shared_ptr<Stage> stage;		//マップ描画クラス
+	std::shared_ptr<Control> control;	//操作クラス
 
 	Entry* Owner;	//Entry クラス
 

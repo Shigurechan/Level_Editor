@@ -32,6 +32,8 @@ enum class Window_Scene
 	Yes,
 	No,
 
+	New_File,
+	Edit_File,
 
 
 
@@ -69,7 +71,7 @@ class Window : public Actor
 public:
 
 
-	Window(Entry* e,Window_Scene s,glm::ivec2 pos ,glm::ivec2 size);	//コンストラクタ
+	Window(Entry* e, Window_Scene s, glm::ivec2 pos, glm::ivec2 size);	//コンストラクタ
 	~Window();							//デストラクタ
 
 

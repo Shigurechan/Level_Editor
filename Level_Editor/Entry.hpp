@@ -1,14 +1,10 @@
 #ifndef ___ENTRY_HPP_
 #define ___ENTRY_HPP_
 
-
-
-#include "Game_Scene.hpp"
 #include "Input.hpp"
 #include <iostream>
 class Game_Scene;
-class Stage;
-
+class StartMenu;
 
 #define CELL ((int)48)	//セル
 
@@ -70,11 +66,13 @@ public:
 	int LoadSprite(const char* FileName);				//スプライトをロード
 
 
-	std::shared_ptr<Input> InputKey;
+	std::shared_ptr<Input> InputKey;	//キー入力
 
 private:
 
-	std::shared_ptr<Game_Scene> game;
+	std::shared_ptr<Game_Scene> game;	//エディット画面
+
+	std::shared_ptr<StartMenu> start;	//ファイル選択画面
 
 	Scene_Type type;
 

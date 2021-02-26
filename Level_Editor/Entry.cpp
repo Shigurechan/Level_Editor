@@ -1,4 +1,6 @@
 #include "Entry.hpp"
+#include "Game_Scene.hpp"
+#include "StartMenu.hpp"
 
 //コンストラクタ
 Entry::Entry()
@@ -6,9 +8,12 @@ Entry::Entry()
 	//printf("SCRREN_WIDTH : %d\n", SCREEN_WIDTH);
 	//printf("SCRREN_HEIGHT : %d\n",SCREEN_HEIGHT);
 
-	InputKey = std::make_shared<Input>();
-	game = std::make_shared<Game_Scene>(Scene_Type::Game,this);
-	type = Scene_Type::Game;
+	InputKey = std::make_shared<Input>();	//キー入力
+
+	game = std::make_shared<Game_Scene>(Scene_Type::Game, this);
+	start = std::make_shared<StartMenu>(Scene_Type::Title, this);
+
+	type = Scene_Type::Title;	//最初のシーン
 }
 
 //スプライトをロード
@@ -35,6 +40,7 @@ void Entry::Update()
 {
 
 	InputKey->Update();
+
 	switch (type)
 	{
 		//メインゲーム
@@ -42,7 +48,18 @@ void Entry::Update()
 	{
 		game->Update();
 		type = game->getSceneType();
-	}
+	}break;
+
+
+	//タイトル
+	case Scene_Type::Title:
+	{
+		start->Update();
+		type = start->getSceneType();
+	}break;
+
+
+
 	};
 }
 
@@ -53,10 +70,19 @@ void Entry::Draw()
 	{
 		//メインゲーム
 	case Scene_Type::Game:
-		{
-			game->Draw();
-			type = game->getSceneType();
-		}
+	{
+		game->Draw();
+		type = game->getSceneType();
+	}break;
+
+
+	//タイトル
+	case Scene_Type::Title:
+	{
+		start->Draw();
+		type = start->getSceneType();
+	}break;
+
 
 
 
