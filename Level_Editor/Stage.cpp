@@ -24,6 +24,36 @@ void Stage::setGrid(MapChip chip)
 }
 
 
+//バイナリファイルにステージを書き込む
+void Stage::WriteFile(EditData data)
+{
+	FILE* fp = NULL;
+
+	fopen_s(&fp, data.FileName, "wb");	//書き込み専用でバイナリファイルを開く
+
+	glm::ivec2 size(STAGE_GRID_X,STAGE_GRID_Y);
+	
+	//先頭８バイトはステージのサイズ
+	fwrite(&size.x, sizeof(int), 1, fp);
+	fwrite(&size.y, sizeof(int), 1, fp);
+
+
+
+	for (int y = 0; y < STAGE_GRID_Y; y++)
+	{
+		for (int x = 0; x < STAGE_GRID_X; x++)
+		{
+			byte b = mStage->at(y).at(x).getBinary();
+			fwrite(&b, sizeof(byte), 1, fp);
+		}
+	}
+
+	fclose(fp);
+}
+
+
+
+
 
 
 //更新

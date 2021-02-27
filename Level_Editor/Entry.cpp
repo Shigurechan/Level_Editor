@@ -43,20 +43,41 @@ void Entry::Update()
 
 	switch (type)
 	{
-		//メインゲーム
-	case Scene_Type::Game:
-	{
-		game->Update();
-		type = game->getSceneType();
-	}break;
 
 
-	//タイトル
+		//タイトル
 	case Scene_Type::Title:
 	{
 		start->Update();
 		type = start->getSceneType();
+
+		if (start->changeScene == true)
+		{
+			data = start->getData();
+		}
+
+
 	}break;
+
+
+
+
+		//メインゲーム
+	case Scene_Type::Game:
+	{
+		//一回だけの場合
+		if (start->changeScene == true)
+		{
+			game->getEditData(data);
+			start->changeScene = false;
+			game->SetUp();
+		}
+
+
+		game->Update();
+		type = game->getSceneType();
+	}break;
+
 
 
 
@@ -68,13 +89,6 @@ void Entry::Draw()
 {
 	switch (type)
 	{
-		//メインゲーム
-	case Scene_Type::Game:
-	{
-		game->Draw();
-		type = game->getSceneType();
-	}break;
-
 
 	//タイトル
 	case Scene_Type::Title:
@@ -83,6 +97,13 @@ void Entry::Draw()
 		type = start->getSceneType();
 	}break;
 
+
+	//メインゲーム
+	case Scene_Type::Game:
+	{
+		game->Draw();
+		type = game->getSceneType();
+	}break;
 
 
 

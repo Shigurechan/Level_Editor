@@ -24,12 +24,15 @@ public:
 
 
 	void Update();	//更新
+
 	void Draw();	//描画
 
 
 	MapChip getChip();	//マップチップ
 
 	bool isWrite_cell;	//書き込むかどうか？
+	bool isWrite_File;	//ステージ情報をバイナリファイルに書き込むかどうか？
+
 private:
 	Entry* Owner;	//Entry クラス
 	glm::ivec2 CursorPos;	//カーソルの場所

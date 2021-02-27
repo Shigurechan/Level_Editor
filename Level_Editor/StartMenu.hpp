@@ -2,6 +2,8 @@
 #define ___STARTMENU_HPP
 
 #include "Scene_base.hpp"
+#include "Entry.hpp"
+
 class Window;
 enum class Window_Scene;
 /*####################################################
@@ -23,15 +25,26 @@ public:
 	void Update();	//更新
 	void Draw();	//描画
 
+	EditData getData();	//ファイル情報を返す
+
+	bool changeScene;	//シーンを切り替える
 private:
+	int KeyHandle;	//キー入力ハンドル
+	char FileName[256] = { '\0' };	//入力したファイル名
 
 	
-	std::shared_ptr<Window> menu;
+	std::shared_ptr<Window> menu;				//メインシーン
+	std::shared_ptr<Window> NewFile_menu;		//新規作成でファイル名入力シーン
+	std::shared_ptr<Window> CheckFile_menu;		//新規作成でファイルがあるかどうか確認シーン
+
+
 
 	Window_Scene type;
 
+	EditData data;	//エディット内容をエディターに伝える
+	byte Mode;
+	bool CheckFile(const char* FileName);
 
 };
 
 #endif
-

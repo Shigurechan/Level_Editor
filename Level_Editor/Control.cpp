@@ -14,7 +14,7 @@ Control::Control(Entry* e)
 	HoldKey_Y = false;
 
 	isWrite_cell = false;	//書き込むかどうか？
-
+	isWrite_File = false;	//バイナリファイルにステージ情報を書き込むかどうか？
 
 
 
@@ -99,7 +99,19 @@ void Control::Update()
 
 	}
 
-	
+	// モード切り替え
+	if (Owner->InputKey->getKeyDown(KEY_INPUT_P) == true)
+	{
+		printf("保存\n");
+
+		isWrite_File = true;	//ファイルを保存
+
+
+	}
+
+
+
+
 
 	//スペースで書き込む
 	if (Owner->InputKey->getKeyDown(KEY_INPUT_SPACE) == true)

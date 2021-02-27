@@ -19,10 +19,13 @@ class Game_Scene : public Scene_base
 public:
 	Game_Scene(Scene_Type t,Entry* e);	//コンストラクタ
 	~Game_Scene();						//デストラクタ
+	void SetUp();	//セットアップ初期設定
+
 
 	void Update();	//更新
 	void Draw();	//描画
 
+	void getEditData(EditData data);	//エディットデータを取得
 private:
 
 
@@ -30,8 +33,9 @@ private:
 	std::shared_ptr<Stage> stage;		//マップ描画クラス
 	std::shared_ptr<Control> control;	//操作クラス
 
+	EditData Data;	//エディットデータを取得
 	Entry* Owner;	//Entry クラス
-
+	FILE* fp;
 };
 
 #endif

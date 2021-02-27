@@ -23,8 +23,8 @@ public:
 	void Update();		//計算
 	void Draw();		//描画
 
-	void setGrid(MapChip chip);	//グリッドに書き込む
-	//void setObject();	//
+	void setGrid(MapChip chip);		//グリッドに書き込む
+	void WriteFile(EditData data);	//バイナリファイルにステージを書き込む
 private:
 
 

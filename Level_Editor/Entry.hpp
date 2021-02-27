@@ -30,6 +30,17 @@ class StartMenu;
 
 #define PI ((float)3.14159265359)	//PI
 
+//書き込みモード
+#define WRITE_OVERRITE 0
+#define WRITE_NEW 1
+
+
+//エディット情報
+typedef struct EditData
+{
+	byte EditMode;			//エディットモード
+	char FileName[200];	//書き込むファイル名
+}EditData;
 
 
 // シーンの種類
@@ -76,6 +87,7 @@ private:
 
 	Scene_Type type;
 
+	EditData data;
 };
 
 

@@ -104,6 +104,13 @@ unsigned char Window::getItem()
 	return ID;
 }
 
+
+// ################## 取得　関係
+
+
+
+
+
 //計算
 void Window::Update()
 {
@@ -126,7 +133,7 @@ void Window::Update()
 			Cursor = (int)lists.size() - 1;
 		}
 	}
-	else if (Owner->InputKey->getKeyDown(KEY_INPUT_SPACE) == true)
+	else if (Owner->InputKey->getKeyDown(KEY_INPUT_RETURN) == true)
 	{	
 		Move_Scene = lists.at(Cursor).winScene;	//シーン推移
 		ID = lists.at(Cursor).ID;	//アイテムID
