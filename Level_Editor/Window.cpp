@@ -6,7 +6,7 @@ Window::Window(Entry * e,Window_Scene s, glm::ivec2 pos, glm::ivec2 size) : Acto
 	Scene = s;							//ウインドウ種別
 	Move_Scene = Window_Scene::Invalid;	//移動するシーン
 	Cursor = 0;	//カーソル
-
+	isInputNumber = false; //数値を入力するかどうか？
 
 	setPosition(pos);								//座標
 	setSize(size);									//大きさ
@@ -19,6 +19,15 @@ Window::Window(Entry * e,Window_Scene s, glm::ivec2 pos, glm::ivec2 size) : Acto
 
 // ################## 設定　関係
 
+//数値を入力するかどうか？
+void Window::setInputNumber()
+{
+	printf("setInputNumber()\n");
+	KeyInputNumber_Handle = MakeKeyInput(INPUT_KEY_NUMBER, false, true, false);	//キー入力ハンドルを作成
+	isInputNumber = true;														//入力を有効にする。
+	SetActiveKeyInput(KeyInputNumber_Handle);									//入力をアクティブ
+
+}
 
 //タイトル
 void Window::setTitle(std::string name,unsigned int c)
@@ -99,22 +108,24 @@ void Window::AddList_Down(Window_Scene s,std::string name,unsigned char num,unsi
 	lists.push_back(item);
 }
 
+// ################## 取得　関係
+
 unsigned char Window::getItem()
 {
 	return ID;
 }
 
-
-// ################## 取得　関係
-
-
-
-
-
 //計算
 void Window::Update()
 {
-	//mInput->Update(); // キー入力更新
+	//数値を入力
+	if (isInputNumber == true)
+	{	
+		GetKeyInputString(lists.at(Cursor).InputKeyData, KeyInputNumber_Handle);
+		printf("数値入力:　%s\n", lists.at(Cursor).InputKeyData);
+
+	}
+
 
 	//キー入力	
 	if (Owner->InputKey->getKeyDown(KEY_INPUT_UP) == true)
@@ -132,12 +143,23 @@ void Window::Update()
 		{
 			Cursor = (int)lists.size() - 1;
 		}
+
+
 	}
 	else if (Owner->InputKey->getKeyDown(KEY_INPUT_RETURN) == true)
 	{	
 		Move_Scene = lists.at(Cursor).winScene;	//シーン推移
 		ID = lists.at(Cursor).ID;	//アイテムID
-	}	
+	}
+
+
+
+
+
+
+
+
+
 }
 
 //描画

@@ -13,6 +13,9 @@
 
 #include "UI.hpp"
 
+
+#define INPUT_KEY_NUMBER 100
+
 // メニュー推移
 enum class Window_Scene
 {
@@ -35,6 +38,9 @@ enum class Window_Scene
 	New_File,
 	Edit_File,
 
+	SizeSet,	//サイズを指定
+
+
 	OverWrite_Check,	//上書きチェック
 
 	WriteFile_OverWrite,	//上書き作成
@@ -45,6 +51,7 @@ enum class Window_Scene
 	End,
 	Back,
 	Invalid,
+	None, //シーン推移ではない。
 };
 
 //ウインドウの項目
@@ -56,7 +63,7 @@ typedef struct List_Item
 	Window_Scene winScene;	// メニュー推移
 	unsigned char ID;		// アイテムID
 	unsigned int Color;		//描画色
-
+	char InputKeyData[INPUT_KEY_NUMBER];	//入力データ
 
 }List_Item;
 
@@ -87,7 +94,7 @@ public:
 	void setPosition(glm::ivec2 pos);					//座標
 	void setSize(glm::ivec2 size);						//サイズ
 	void setBackColor(unsigned int c);					//背景色
-
+	void setInputNumber();								//数値を入力するかどうか？
 	void AddList_Down(Window_Scene s, std::string name, unsigned char num, unsigned int c); //ウインドウに項目を追加
 
 	void Reset();
@@ -128,8 +135,12 @@ private:
 	
 
 	glm::ivec2 ItemPos;	//項目の座標を調整
+	int KeyInputNumber_Handle;	//数値入力ハンドル
 
+	char size_x[INPUT_KEY_NUMBER];
+	char size_y[INPUT_KEY_NUMBER];
 
+	bool isInputNumber;//数値を入力するかどうか？
 
 
 };
