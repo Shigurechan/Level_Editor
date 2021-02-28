@@ -1,13 +1,21 @@
 #include "Control.hpp"
 #include "Entry.hpp"
 #include "MapChip.hpp"
+#include "Fps.hpp"
 
 //コンストラクタ
-Control::Control(Entry* e)
+Control::Control(Entry* e, std::vector<int> sprite)
 {
+	printf("X: %d\n", (SCREEN_WIDTH / CELL) / 2 * CELL);
+
+
 	Owner = e; //Entry クラス
-	CursorPos = glm::ivec2(0, 0);	//カーソル座標
-	GridPos = CursorPos;			//グリッドの座標
+	SpriteList = sprite;	//スプライトリスト
+
+	CursorPos = glm::ivec2((SCREEN_WIDTH / CELL) / 2 * CELL, (SCREEN_HEIGHT / CELL) / 2 * CELL);	//カーソル座標
+	GridPos = glm::ivec2(CursorPos.x / CELL, CursorPos.y / CELL);		//グリッドの座標
+
+	anim = std::make_shared<Animation>(2);	//カーソル点滅アニメーション
 
 	//長押し
 	HoldKey_X = false;
@@ -16,15 +24,20 @@ Control::Control(Entry* e)
 	isWrite_cell = false;	//書き込むかどうか？
 	isWrite_File = false;	//バイナリファイルにステージ情報を書き込むかどうか？
 
+	//書き込み情報を設定
+	chip.setBinary(0x01);				//バイナリ
+	chip.setSprite(SpriteList.at(0));	//スプライト
+	chip.setPosition(GridPos);			//グリッド座標
 
 
-	Block_Handle = Owner->LoadSprite("Assets/Block.png");	//ブロック	
+
+	
 }
 
 //更新
 void Control::Update()
 {
-	int speed = CELL;	
+	int speed = CELL;
 #define HOLD_TIME 30	//長押ししてから反応するまでの時間
 
 
@@ -32,6 +45,7 @@ void Control::Update()
 	//左右
 	if (Owner->InputKey->getKeyDownHold(KEY_INPUT_LEFT) > 0)
 	{
+		//長押し
 		if (HoldKey_X == false) {
 			CursorPos.x += -speed;
 			GridPos.x += -1;
@@ -43,8 +57,10 @@ void Control::Update()
 				HoldKey_X = false;
 			}
 		}
-	}else if (Owner->InputKey->getKeyDownHold(KEY_INPUT_RIGHT) > 0)
+	}
+	else if (Owner->InputKey->getKeyDownHold(KEY_INPUT_RIGHT) > 0)
 	{
+		//長押し
 		if (HoldKey_X == false) {
 			CursorPos.x += speed;
 			GridPos.x += 1;
@@ -64,8 +80,9 @@ void Control::Update()
 
 
 	//上下
-	if (Owner->InputKey->getKeyDownHold(KEY_INPUT_UP)  > 0)
+	if (Owner->InputKey->getKeyDownHold(KEY_INPUT_UP) > 0)
 	{
+		//長押し
 		if (HoldKey_Y == false) {
 			CursorPos.y += -speed;
 			GridPos.y += -1;
@@ -79,8 +96,9 @@ void Control::Update()
 			}
 		}
 	}
-	else if(Owner->InputKey->getKeyDownHold(KEY_INPUT_DOWN) > 0)
+	else if (Owner->InputKey->getKeyDownHold(KEY_INPUT_DOWN) > 0)
 	{
+		//長押し
 		if (HoldKey_Y == false) {
 			CursorPos.y += speed;
 			GridPos.y += 1;
@@ -105,32 +123,72 @@ void Control::Update()
 		printf("保存\n");
 
 		isWrite_File = true;	//ファイルを保存
-
-
+	}
+	else
+	{
+		isWrite_File = false;
 	}
 
 
+	//ファンクションキーで切り替え
+	if (Owner->InputKey->getKeyDown(KEY_INPUT_F1) == true)
+	{
+		chip.setBinary(0x01);				//バイナリ
+		chip.setSprite(SpriteList.at(0));	//スプライト
+		chip.setPosition(GridPos);			//グリッド座標
+	}
+	else if (Owner->InputKey->getKeyDown(KEY_INPUT_F2) == true)
+	{
+		chip.setBinary(0x02);				//バイナリ
+		chip.setSprite(SpriteList.at(1));	//スプライト
+		chip.setPosition(GridPos);			//グリッド座標
+	}
+	else if (Owner->InputKey->getKeyDown(KEY_INPUT_F3) == true)
+	{
+		chip.setBinary(0x03);				//バイナリ
+		chip.setSprite(SpriteList.at(2));	//スプライト
+		chip.setPosition(GridPos);			//グリッド座標
+	}
 
 
+	if (Owner->InputKey->getKeyDown(KEY_INPUT_F1) == true)
+	{
+		chip.setBinary(0x01);				//バイナリ
+		chip.setSprite(SpriteList.at(0));	//スプライト
+		chip.setPosition(GridPos);			//グリッド座標
+	}
 
-	//スペースで書き込む
+
+	//スペースキーで書き込む
 	if (Owner->InputKey->getKeyDown(KEY_INPUT_SPACE) == true)
 	{
-		chip.setBinary(0x01);			//バイナリ
-		chip.setSprite(Block_Handle);	//スプライト
-		chip.setPosition(GridPos);		//グリッド座標
+		chip.setPosition(GridPos);			//グリッド座標
 
-		isWrite_cell = true;	//グリッドに書き込む
+		isWrite_cell = true;	//ステージに書き込む
 	}
 	else {
-		isWrite_cell = false;
+		isWrite_cell = false;	//ステージ書き込まない
 	}
 
 
 
 
+	//ステージの書き込みを消す
+	if (Owner->InputKey->getKeyDown(KEY_INPUT_DELETE) == true)
+	{
+		chip.setBinary(0x00);				//バイナリ
+		chip.setSprite(0);					//スプライト		
+		chip.setPosition(GridPos);			//グリッド座標
 
+		isWrite_cell = true;	//ステージに書き込む
+	}
+	
+}
 
+//マップをスクロールする向き
+glm::ivec2 Control::getMove()
+{
+	return ScrollMove;
 }
 
 
@@ -144,7 +202,11 @@ MapChip Control::getChip()
 void Control::Draw()
 {
 	//矩形描画
-	DrawBox(CursorPos.x + 1, CursorPos.y + 1, CursorPos.x + CELL, CursorPos.y + CELL, GetColor(0,0,120),true);
+	int c = anim->getClip_loop(5);
+	if (c == 1) {
+		DrawBox(CursorPos.x + 1, CursorPos.y + 1, CursorPos.x + CELL, CursorPos.y + CELL, GetColor(0, 255, 0), true);
+	
+	}
 }
 
 //デストラクタ

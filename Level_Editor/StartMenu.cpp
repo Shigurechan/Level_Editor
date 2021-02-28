@@ -39,6 +39,7 @@ StartMenu::StartMenu(Scene_Type t, Entry* e) : Scene_base(t,e)
 	CheckFile_menu->AddList_Down(Window_Scene::WriteFile_OverWrite, "YES", 1, GetColor(0, 0, 0));
 	CheckFile_menu->AddList_Down(Window_Scene::New_File, "NO", 0, GetColor(0, 0, 0));
 
+
 }
 
 //更新
@@ -171,10 +172,10 @@ void StartMenu::Update()
 	case Window_Scene::Write_NewFile:
 	{
 		//printf("新規ファイルを作成\n");
-		memcpy(data.FileName, FileName, sizeof(data.FileName));
-		data.EditMode = Mode;
-		changeScene = true;
-		Type = Scene_Type::Game;
+		memcpy(data.FileName, FileName, sizeof(data.FileName));	//
+		data.EditMode = Mode;									//
+		changeScene = true;										//
+		Type = Scene_Type::Game;								//シーン推移
 
 	}break;
 
@@ -186,7 +187,7 @@ void StartMenu::Update()
 		memcpy(data.FileName, FileName, sizeof(data.FileName));	//
 		data.EditMode = Mode;									//
 		changeScene = true;										//
-		Type = Scene_Type::Game;								//
+		Type = Scene_Type::Game;								//シーン推移
 
 	}break;
 
@@ -214,6 +215,7 @@ void StartMenu::Draw()
 	{
 		NewFile_menu->Draw();
 		DrawFormatString(NewFile_menu->getPosition().x + 20, NewFile_menu->getPosition().y + 50, GetColor(0, 100, 0), "FileName: %s", FileName);
+		DrawFormatString(NewFile_menu->getPosition().x + 10, NewFile_menu->getPosition().y + 160, GetColor(0, 100, 0), "Space: 戻る");
 	}break;
 
 		//上書き確認
@@ -222,11 +224,13 @@ void StartMenu::Draw()
 		CheckFile_menu->Draw();	
 	}break;
 
-	//上書き確認
+	//編集するファイル名を入力画面
 	case Window_Scene::Edit_File:
 	{
 		EditFile_menu->Draw();
 		DrawFormatString(EditFile_menu->getPosition().x + 20, EditFile_menu->getPosition().y + 50, GetColor(0, 100, 0), "FileName: %s", FileName);
+		DrawFormatString(NewFile_menu->getPosition().x + 10, NewFile_menu->getPosition().y + 160, GetColor(0, 100, 0), "Space: 戻る");
+
 
 	}break;
 

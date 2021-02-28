@@ -4,8 +4,6 @@
 #include "Scene_base.hpp"
 #include "Entry.hpp"
 
-class Window;
-enum class Window_Scene;
 /*####################################################
 * ロードメニュー
 *
@@ -14,8 +12,12 @@ enum class Window_Scene;
 * 最初の画面
 * ファイルを読み込むかそれとも新規作成かを選択する画面
 ######################################################*/
+
 enum class Scene_Type;
+enum class Window_Scene;
 class Entry;
+class Window;
+
 class StartMenu : public Scene_base
 {
 public:
@@ -37,14 +39,16 @@ private:
 	std::shared_ptr<Window> NewFile_menu;		//新規作成でファイル名入力シーン
 	std::shared_ptr<Window> EditFile_menu;		//編集するファイル名入力シーン
 	std::shared_ptr<Window> CheckFile_menu;		//新規作成でファイルがあるかどうか確認シーン
+	std::shared_ptr<Window> SizeSet_menu;		//ステージサイズを設定するシーン
 
 
 
-	Window_Scene type;
+
+	Window_Scene type;	//ウインドウシーン推移
 
 	EditData data;	//エディット内容をエディターに伝える
-	byte Mode;
-	bool CheckFile(const char* FileName);
+	byte Mode;		//モード
+	bool CheckFile(const char* FileName);	//ファイルが存在するかどうか？
 
 };
 

@@ -4,7 +4,11 @@
 
 #include <Dxlib.h>
 #include "MapChip.hpp"
+#include "Animation.hpp"
+
 #include "glm/glm.hpp"
+#include <vector>
+#include <iostream>
 
 class Entry;
 
@@ -18,7 +22,7 @@ class Entry;
 class Control
 {
 public:
-	Control(Entry* e);	//コンストラクタ
+	Control(Entry* e,std::vector<int> sprite);	//コンストラクタ
 	~Control();			//デストラクタ
 
 
@@ -27,34 +31,28 @@ public:
 
 	void Draw();	//描画
 
-
+	glm::ivec2 getMove();
 	MapChip getChip();	//マップチップ
 
 	bool isWrite_cell;	//書き込むかどうか？
 	bool isWrite_File;	//ステージ情報をバイナリファイルに書き込むかどうか？
 
 private:
-	Entry* Owner;	//Entry クラス
 	glm::ivec2 CursorPos;	//カーソルの場所
-	glm::ivec2 GridPos;	//グリッドの場所
+	glm::ivec2 GridPos;		//グリッドの場所
+	glm::ivec2 ScrollMove;	//スクロールする向き
 
-	MapChip chip;
 
+	MapChip chip;	//書き込む情報
+	std::vector<int> SpriteList;	//スプライトリスト
+	std::shared_ptr<Animation> anim;
 
 	//長押し
 	bool HoldKey_X;
 	bool HoldKey_Y;
 
 
-
-	//テスト
-	int Block_Handle;
-
-
-
-
-
-
+	Entry* Owner;			//Entry クラス
 };
 
 

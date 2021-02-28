@@ -1,14 +1,14 @@
 #include "Stage.hpp"
 
 //コンストラクタ
-Stage::Stage(Entry* e)
+Stage::Stage(Entry* e, std::vector<int> spriteList)
 {	
 	Owner = e;
+	SpriteList = spriteList;
 
 	mStage = std::make_shared < std::array<std::array<MapChip, STAGE_GRID_X>, STAGE_GRID_Y>>();
 	
-	handle = Owner->LoadSprite("Assets/Block.png");	//ブロック	
-
+	
 	//グリッドを初期化
 	for (int y = 0; y < STAGE_GRID_Y; y++)
 	{
@@ -22,8 +22,14 @@ Stage::Stage(Entry* e)
 //グリッドに書き込む
 void Stage::setGrid(MapChip chip)
 {
-	mStage->at(chip.getPosition().y).at(chip.getPosition().x).setBinary(chip.getBinary());	//バイナリを設定
-	mStage->at(chip.getPosition().y).at(chip.getPosition().x).setSprite(chip.getSprite());	//スプライトを設定
+	try {
+		mStage->at(chip.getPosition().y).at(chip.getPosition().x).setBinary(chip.getBinary());	//バイナリを設定
+		mStage->at(chip.getPosition().y).at(chip.getPosition().x).setSprite(chip.getSprite());	//スプライトを設定
+	}
+	catch (std::exception e)
+	{
+		printf("setGrid():  %s\n",e.what());
+	}
 }
 
 
@@ -70,7 +76,7 @@ void Stage::ReadFile(EditData data)
 	fread(&size.y, sizeof(int), 1, fp);
 
 	
-
+	printf("読み込み中\n");
 	for (int y = 0; y < STAGE_GRID_Y; y++)
 	{
 		for (int x = 0; x < STAGE_GRID_X; x++)
@@ -80,18 +86,26 @@ void Stage::ReadFile(EditData data)
 			fread(&b, sizeof(byte), 1, fp);
 
 			mStage->at(y).at(x).setBinary(b);
-			if (b == 1) {
-				mStage->at(y).at(x).setSprite(handle);
-			}
 
+			if (b == 0) {
+				mStage->at(y).at(x).setSprite(0);
+			}
+			else if (b > 0)
+			{
+				mStage->at(y).at(x).setSprite(SpriteList.at(b - 1));
+			}
 		}
 	}
+	printf("読み込み完了\n");
 
 	fclose(fp);	//ファイルを閉じる。
 }
 
+//スクロールする向き
+void Stage::Scroll(glm::ivec2 m)
+{
 
-
+}
 
 
 //更新

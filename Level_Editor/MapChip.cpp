@@ -15,7 +15,7 @@ MapChip::MapChip() : Actor(nullptr)
 void MapChip::setBinary(byte b)
 {
 	binary = b;
-	printf("%x\n",binary);
+	//printf("%x\n",binary);
 }
 
 //スプライト

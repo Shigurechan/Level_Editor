@@ -2,6 +2,9 @@
 #include "Stage.hpp"
 #include "Control.hpp"
 
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 //コンストラクタ
 Game_Scene::Game_Scene(Scene_Type t,Entry *e) : Scene_base(t,e)
@@ -11,16 +14,24 @@ Game_Scene::Game_Scene(Scene_Type t,Entry *e) : Scene_base(t,e)
 
 	// #####　スプライトをロード #####
 
-	//int Player_Handle = Owner->LoadSprite("Assets/Player/Player_0.png");	//プレイヤー
-	//int Enemy_Handle = Owner->LoadSprite("Assets/Enemy.png");				//エネミー	
-	
-	//int Block_Handle = Owner->LoadSprite("Assets/Block.png");	//ブロック	
-	//int Brick_Handle = Owner->LoadSprite("Assets/Brick.png");	//レンガ
-	//int Shop_Handle = Owner->LoadSprite("Assets/Shop.png");		//ショップ
+	std::vector<int> SpriteList;	//スプライトリスト
+
+	//スプライト読み込み
+	SpriteList.push_back(Owner->LoadSprite("Sprite_Data/Block.png"));
+	SpriteList.push_back(Owner->LoadSprite("Sprite_Data/Brick.png"));
+	SpriteList.push_back(Owner->LoadSprite("Sprite_Data/Shop.png"));
+
+
+
+
+
+
+
+
 
 	// #####　コンポーネント #####
-	stage = std::make_shared<Stage>(Owner);		//マップ描画
-	control = std::make_shared<Control>(Owner);	//操作
+	stage = std::make_shared<Stage>(Owner,SpriteList);				//マップ描画
+	control = std::make_shared<Control>(Owner,SpriteList);			//操作
 
 
 
@@ -29,34 +40,28 @@ Game_Scene::Game_Scene(Scene_Type t,Entry *e) : Scene_base(t,e)
 //初期化
 void Game_Scene::SetUp()
 {
-	FILE* fp = NULL;	//ファイルポインタ
 
 
 	//新規作成
 	if (Data.EditMode == (byte)WRITE_NEW)
 	{
 		printf("新規ファイルを作成\n");
+
+		FILE* fp = NULL;	//ファイルポインタ
 		fopen_s(&fp, Data.FileName, "wb"); //書き込み専用モード
 		fclose(fp);	//ファイルを閉じる
 	}
 	else if (Data.EditMode == (byte)WRITE_Edit)
 	{
-		//編集作成
-
 		printf("ファイル編集\n");
-		stage->ReadFile(Data);
+		stage->ReadFile(Data);	//ファイルを読み込み
 
 	}
 	else if (Data.EditMode == (byte)WRITE_OVERRITE)
 	{
 		printf("上書き作成\n");
-		fopen_s(&fp, Data.FileName, "wb"); //書き込み専用モード
-		fclose(fp);	//ファイルを閉じる
+		stage->ReadFile(Data);	//ファイルを読み込み
 	}
-
-	
-
-
 }
 
 
@@ -80,7 +85,7 @@ void Game_Scene::Update()
 		control->isWrite_File = false;
 	}
 
-
+	stage->Scroll(control->getMove());	//画面スクロール
 
 
 

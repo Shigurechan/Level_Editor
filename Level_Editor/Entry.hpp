@@ -41,7 +41,8 @@ typedef struct EditData
 {
 	byte EditMode;			//エディットモード
 	char FileName[200];	//書き込むファイル名
-	FILE *fp;	//ファイルポインタ
+
+
 }EditData;
 
 
