@@ -1,10 +1,13 @@
 #include "Stage.hpp"
 
 //コンストラクタ
-Stage::Stage()
+Stage::Stage(Entry* e)
 {	
-	mStage = std::make_shared < std::array<std::array<MapChip, STAGE_GRID_X>, STAGE_GRID_Y>>();
+	Owner = e;
 
+	mStage = std::make_shared < std::array<std::array<MapChip, STAGE_GRID_X>, STAGE_GRID_Y>>();
+	
+	handle = Owner->LoadSprite("Assets/Block.png");	//ブロック	
 
 	//グリッドを初期化
 	for (int y = 0; y < STAGE_GRID_Y; y++)
@@ -51,6 +54,41 @@ void Stage::WriteFile(EditData data)
 	fclose(fp);
 }
 
+//バイナリファイルにステージを読み込む
+void Stage::ReadFile(EditData data)
+{
+	FILE* fp = NULL;
+
+	printf("ファイル読み込み\n");
+
+	fopen_s(&fp, data.FileName, "rb");	//読み込みモードでバイナリファイルを開く
+	
+	glm::ivec2 size(STAGE_GRID_X, STAGE_GRID_Y);
+
+	//先頭８バイトはステージのサイズ
+	fread(&size.x, sizeof(int), 1, fp);
+	fread(&size.y, sizeof(int), 1, fp);
+
+	
+
+	for (int y = 0; y < STAGE_GRID_Y; y++)
+	{
+		for (int x = 0; x < STAGE_GRID_X; x++)
+		{
+			//byte b = mStage->at(y).at(x).getBinary();
+			byte b = 0;
+			fread(&b, sizeof(byte), 1, fp);
+
+			mStage->at(y).at(x).setBinary(b);
+			if (b == 1) {
+				mStage->at(y).at(x).setSprite(handle);
+			}
+
+		}
+	}
+
+	fclose(fp);	//ファイルを閉じる。
+}
 
 
 

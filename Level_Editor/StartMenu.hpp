@@ -35,6 +35,7 @@ private:
 	
 	std::shared_ptr<Window> menu;				//メインシーン
 	std::shared_ptr<Window> NewFile_menu;		//新規作成でファイル名入力シーン
+	std::shared_ptr<Window> EditFile_menu;		//編集するファイル名入力シーン
 	std::shared_ptr<Window> CheckFile_menu;		//新規作成でファイルがあるかどうか確認シーン
 
 

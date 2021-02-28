@@ -35,7 +35,6 @@ private:
 
 	EditData Data;	//エディットデータを取得
 	Entry* Owner;	//Entry クラス
-	FILE* fp;
 };
 
 #endif

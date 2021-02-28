@@ -39,6 +39,7 @@ enum class Window_Scene
 
 	WriteFile_OverWrite,	//上書き作成
 	Write_NewFile,			//新規作成	
+	Write_EditFile,			//編集
 
 	//戻る　終了
 	End,

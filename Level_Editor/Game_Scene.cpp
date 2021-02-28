@@ -19,7 +19,7 @@ Game_Scene::Game_Scene(Scene_Type t,Entry *e) : Scene_base(t,e)
 	//int Shop_Handle = Owner->LoadSprite("Assets/Shop.png");		//ショップ
 
 	// #####　コンポーネント #####
-	stage = std::make_shared<Stage>();		//マップ描画
+	stage = std::make_shared<Stage>(Owner);		//マップ描画
 	control = std::make_shared<Control>(Owner);	//操作
 
 
@@ -29,14 +29,32 @@ Game_Scene::Game_Scene(Scene_Type t,Entry *e) : Scene_base(t,e)
 //初期化
 void Game_Scene::SetUp()
 {
-	/*
-	//新規作成だったら
+	FILE* fp = NULL;	//ファイルポインタ
+
+
+	//新規作成
 	if (Data.EditMode == (byte)WRITE_NEW)
 	{
 		printf("新規ファイルを作成\n");
 		fopen_s(&fp, Data.FileName, "wb"); //書き込み専用モード
-	} 
-	*/
+		fclose(fp);	//ファイルを閉じる
+	}
+	else if (Data.EditMode == (byte)WRITE_Edit)
+	{
+		//編集作成
+
+		printf("ファイル編集\n");
+		stage->ReadFile(Data);
+
+	}
+	else if (Data.EditMode == (byte)WRITE_OVERRITE)
+	{
+		printf("上書き作成\n");
+		fopen_s(&fp, Data.FileName, "wb"); //書き込み専用モード
+		fclose(fp);	//ファイルを閉じる
+	}
+
+	
 
 
 }

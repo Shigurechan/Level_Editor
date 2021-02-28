@@ -65,7 +65,7 @@ void Entry::Update()
 		//ƒƒCƒ“ƒQ[ƒ€
 	case Scene_Type::Game:
 	{
-		//ˆê‰ñ‚¾‚¯‚Ìê‡
+		//ˆê‰ñ‚¾‚¯
 		if (start->changeScene == true)
 		{
 			game->getEditData(data);

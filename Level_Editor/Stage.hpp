@@ -17,7 +17,7 @@
 class Stage
 {
 public:
-	Stage();	//コンストラクタ
+	Stage(Entry *e);	//コンストラクタ
 	~Stage();	//デストラクタ
 
 	void Update();		//計算
@@ -25,11 +25,13 @@ public:
 
 	void setGrid(MapChip chip);		//グリッドに書き込む
 	void WriteFile(EditData data);	//バイナリファイルにステージを書き込む
+	void ReadFile(EditData data);	//バイナリファイルを読み込む
 private:
 
 
 	std::shared_ptr<std::array<std::array<MapChip, STAGE_GRID_X>,STAGE_GRID_Y>> mStage;	//ステージ
-	
+	Entry* Owner;
+	int handle;
 };
 
 

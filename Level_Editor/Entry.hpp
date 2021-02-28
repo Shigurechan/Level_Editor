@@ -30,9 +30,10 @@ class StartMenu;
 
 #define PI ((float)3.14159265359)	//PI
 
-//書き込みモード
-#define WRITE_OVERRITE 0
-#define WRITE_NEW 1
+//ファイルモード
+#define WRITE_OVERRITE 0	//上書き
+#define WRITE_NEW 1			//新規作成
+#define WRITE_Edit 2		//編集
 
 
 //エディット情報
@@ -40,6 +41,7 @@ typedef struct EditData
 {
 	byte EditMode;			//エディットモード
 	char FileName[200];	//書き込むファイル名
+	FILE *fp;	//ファイルポインタ
 }EditData;
 
 

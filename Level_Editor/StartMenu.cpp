@@ -28,6 +28,11 @@ StartMenu::StartMenu(Scene_Type t, Entry* e) : Scene_base(t,e)
 	NewFile_menu = std::make_shared<Window>(e, Window_Scene::New_File, glm::ivec2(100, 100), glm::ivec2(300, 200));
 	NewFile_menu->setTitle("  ファイル名入力してください", GetColor(0,0,0));
 
+	//編集する時のファイル名入力
+	EditFile_menu = std::make_shared<Window>(e, Window_Scene::Edit_File, glm::ivec2(100, 100), glm::ivec2(300, 200));
+	EditFile_menu->setTitle("  ファイル名入力してください", GetColor(0, 0, 0));
+
+
 	//ファイルが存在するかどうか？　存在する時の上書き確認
 	CheckFile_menu = std::make_shared<Window>(e, Window_Scene::OverWrite_Check, glm::ivec2(200, 200), glm::ivec2(300, 300));
 	CheckFile_menu->setTitle("ファイルが存在します上書きしますか？", GetColor(0, 0, 0));
@@ -52,11 +57,9 @@ void StartMenu::Update()
 		menu->Update();	//更新
 		if (menu->getChangeScene() != Window_Scene::Invalid)
 		{
-			//キー入力をアクティブにする。
-			if (menu->getChangeScene() == Window_Scene::New_File) {
-				SetActiveKeyInput(KeyHandle);//文字列入力を有効化
-			}
-
+			//キー入力をアクティブにする。		
+			SetActiveKeyInput(KeyHandle);//文字列入力を有効化
+			
 			type = menu->getChangeScene();//シーン切り替え
 			menu->Reset();//ウインドを再初期化
 		}
@@ -96,6 +99,33 @@ void StartMenu::Update()
 			SetActiveKeyInput(KeyHandle);						//入力をアクティブ
 		}
 	}break;
+
+
+	//ファイルを編集
+	case Window_Scene::Edit_File:
+	{
+		//printf("New File\n");
+		GetKeyInputString(FileName, KeyHandle);	//入力文字列を取得
+
+		//エンターキーで決定
+		if (Owner->InputKey->getKeyDown(KEY_INPUT_RETURN) == true)
+		{
+			type = Window_Scene::Write_EditFile;
+			Mode = WRITE_Edit;	//エディットモード上書き
+
+		}
+		else if (Owner->InputKey->getKeyDown(KEY_INPUT_SPACE) == true)
+		{
+			// 戻る場合
+			type = Window_Scene::Main;	//メインメニューに戻る
+
+			memset(FileName, '\0', sizeof(FileName));			//名前の文字列を再初期化
+			InitKeyInput();										//入力データを削除
+			KeyHandle = MakeKeyInput(100, false, true, false);	//キー入力ハンドルを作成
+			SetActiveKeyInput(KeyHandle);						//入力をアクティブ
+		}
+	}break;
+
 
 		//上書き確認
 	case Window_Scene::OverWrite_Check:
@@ -149,6 +179,20 @@ void StartMenu::Update()
 	}break;
 
 	
+	//　*** ファイルを編集してエディット画面に移行 *** 
+	case Window_Scene::Write_EditFile:
+	{
+		//printf("ファイルを編集\n");
+		memcpy(data.FileName, FileName, sizeof(data.FileName));	//
+		data.EditMode = Mode;									//
+		changeScene = true;										//
+		Type = Scene_Type::Game;								//
+
+	}break;
+
+
+
+
 		
 	}
 
@@ -178,6 +222,13 @@ void StartMenu::Draw()
 		CheckFile_menu->Draw();	
 	}break;
 
+	//上書き確認
+	case Window_Scene::Edit_File:
+	{
+		EditFile_menu->Draw();
+		DrawFormatString(EditFile_menu->getPosition().x + 20, EditFile_menu->getPosition().y + 50, GetColor(0, 100, 0), "FileName: %s", FileName);
+
+	}break;
 
 
 
