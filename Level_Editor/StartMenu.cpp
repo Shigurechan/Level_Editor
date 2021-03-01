@@ -11,24 +11,22 @@
 //コンスタラクタ
 StartMenu::StartMenu(Scene_Type t, Entry* e) : Scene_base(t,e)
 {
+#define BACK_COLOR GetColor(255,255,255)
 
 	type = Window_Scene::Main;	//最初のシーン
 	changeScene = false;	//シーンを切り替える
-	KeyHandle = MakeKeyInput(100, false, true, false);	//キー入力ハンドルを作成
-	if (KeyHandle == -1) { printf("Error MakeKeyInput()\n"); }	
-	SetActiveKeyInput(KeyHandle);						//入力をアクティブ
-
-
+		
 	//メインメニュー
-	menu = std::make_shared<Window>(e,Window_Scene::Main,glm::ivec2(100,100),glm::ivec2(200,200));
-	menu->setTitle("ファイルメニュー",GetColor(0,0,0));
-	menu->AddList_Down(Window_Scene::New_File, "新規", 0, GetColor(0, 0, 0));
-	menu->AddList_Down(Window_Scene::Edit_File, "編集", 1, GetColor(0, 0, 0));
-
+	Main_menu = std::make_shared<Window>(e,Window_Scene::Main,glm::ivec2(100,100),glm::ivec2(200,200));
+	Main_menu->setTitle("ファイルメニュー",GetColor(0,0,0));
+	Main_menu->AddList_Down(Window_Scene::New_File, "新規", 1, GetColor(0, 0, 0), BACK_COLOR);
+	Main_menu->AddList_Down(Window_Scene::Edit_File, "編集", 2, GetColor(0, 0, 0), BACK_COLOR);
+		
 	//新規作成
 	NewFile_menu = std::make_shared<Window>(e, Window_Scene::New_File, glm::ivec2(200, 200), glm::ivec2(300, 200));
-	NewFile_menu->setTitle("  ファイル名入力してください", GetColor(0,0,0));
-
+	NewFile_menu->setTitle("  ファイル名入力してください", GetColor(0, 0, 0));
+	NewFile_menu->AddList_Down(Window_Scene::None, "FileName: ", 2, GetColor(0, 0, 0), BACK_COLOR,INPUT_CHARACTER);
+	
 	//編集
 	EditFile_menu = std::make_shared<Window>(e, Window_Scene::Edit_File, glm::ivec2(200, 200), glm::ivec2(300, 200));
 	EditFile_menu->setTitle("  ファイル名入力してください", GetColor(0, 0, 0));
@@ -36,16 +34,16 @@ StartMenu::StartMenu(Scene_Type t, Entry* e) : Scene_base(t,e)
 	//存在する時の上書き確認
 	CheckFile_menu = std::make_shared<Window>(e, Window_Scene::OverWrite_Check, glm::ivec2(300, 300), glm::ivec2(400, 300));
 	CheckFile_menu->setTitle("ファイルが存在します上書きしますか？", GetColor(0, 0, 0));
-	CheckFile_menu->AddList_Down(Window_Scene::WriteFile_OverWrite, "YES", 1, GetColor(0, 0, 0));
-	CheckFile_menu->AddList_Down(Window_Scene::New_File, "NO", 0, GetColor(0, 0, 0));
+	CheckFile_menu->AddList_Down(Window_Scene::WriteFile_OverWrite, "YES", 3, GetColor(0, 0, 0), BACK_COLOR);
+	CheckFile_menu->AddList_Down(Window_Scene::New_File, "NO", 4, GetColor(0, 0, 0), BACK_COLOR);
 
 	//ステージのサイズを指定する
-	SizeSet_menu = std::make_shared<Window>(e, Window_Scene::SizeSet, glm::ivec2(400, 400), glm::ivec2(500, 400));
-	SizeSet_menu->setTitle("ステージのサイズ",GetColor(0,0,0));							//タイトル
-	SizeSet_menu->AddList_Down(Window_Scene::None, "X: ", 0, GetColor(0, 0, 0));	//X座標を指定
-	SizeSet_menu->AddList_Down(Window_Scene::None, "Y: ", 1, GetColor(0, 0, 0));	//Y座標を指定
-	SizeSet_menu->AddList_Down(Window_Scene::Write_NewFile, "決定: ", 2, GetColor(0, 0, 0));	//決定ボタン
-	SizeSet_menu->setInputNumber();
+	SizeSet_NewFile_menu = std::make_shared<Window>(e, Window_Scene::SizeSet, glm::ivec2(400, 400), glm::ivec2(500, 400));
+	SizeSet_NewFile_menu->setTitle("ステージのサイズを指定",GetColor(0,0,0));							//タイトル
+	SizeSet_NewFile_menu->AddList_Down(Window_Scene::Invalid, "X: ", 5, GetColor(0, 0, 0), BACK_COLOR);	//X座標を指定
+	SizeSet_NewFile_menu->AddList_Down(Window_Scene::Invalid, "Y: ", 6, GetColor(0, 0, 0), BACK_COLOR);	//Y座標を指定
+	SizeSet_NewFile_menu->AddList_Down(Window_Scene::Write_NewFile, "決定: ", 7, GetColor(0, 0, 0), BACK_COLOR);	//決定ボタン
+
 
 
 }
@@ -53,175 +51,57 @@ StartMenu::StartMenu(Scene_Type t, Entry* e) : Scene_base(t,e)
 //更新
 void StartMenu::Update()
 {
-
-	
-
 	switch (type)
 	{
 		//メインメニュー
 	case Window_Scene::Main:
 	{
-//		printf("Main\n");
+		Main_menu->Update();
 
-		menu->Update();	//更新
-		if (menu->getChangeScene() != Window_Scene::Invalid)
+		if (Main_menu->getChangeScene() != Window_Scene::Invalid)
 		{
-			//キー入力をアクティブにする。		
-			SetActiveKeyInput(KeyHandle);//文字列入力を有効化
-			
-			type = menu->getChangeScene();//シーン切り替え
-			menu->Reset();//ウインドを再初期化
+			type = Main_menu->getChangeScene();
+			Main_menu->Reset();
 		}
 	}break;
 
-
-		//新規作成
+	//新規作成
 	case Window_Scene::New_File:
 	{
-		//printf("New File\n");
-		GetKeyInputString(FileName, KeyHandle);	//入力文字列を取得
-				
-		//エンターキーで決定
-		if (Owner->InputKey->getKeyDown(KEY_INPUT_RETURN) == true)
+		NewFile_menu->Update();
+
+		if (NewFile_menu->getChangeScene() != Window_Scene::Invalid)
 		{
+			std::vector<char*> tmp;
+			tmp = NewFile_menu->getInputKeyData();
 
-			//ファイルがあるかどうか？
-			if (CheckFile(FileName) == true) {
-				//存在する場合
-				type = Window_Scene::OverWrite_Check;	//上書き確認シーンに移動
-			}
-			else {
-				//ない場合(新規作成)
-				type = Window_Scene::SizeSet;	//新規作成
-				Mode = (byte)WRITE_NEW;	//エディットモード　新規作成
-
-			}
-		}
-		else if (Owner->InputKey->getKeyDown(KEY_INPUT_SPACE) == true)
-		{
-			// 戻る場合
-			type = Window_Scene::Main;	//メインメニューに戻る
-
-			memset(FileName, '\0', sizeof(FileName));			//名前の文字列を再初期化
-			InitKeyInput();										//入力データを削除
-			KeyHandle = MakeKeyInput(100, false, true, false);	//キー入力ハンドルを作成
-			SetActiveKeyInput(KeyHandle);						//入力をアクティブ
-		}
-	}break;
-
-
-
-	//新規作成のときのサイズ設定
-	case Window_Scene::SizeSet:
-	{
-		//printf("New File\n");
-		SizeSet_menu->Update();
-		//エンターキーで決定
-		if (Owner->InputKey->getKeyDown(KEY_INPUT_RETURN) == true)
-		{
-
-		}
-		
-	}break;
-
-
-
-
-
-	//ファイルを編集
-	case Window_Scene::Edit_File:
-	{
-		//printf("New File\n");
-		GetKeyInputString(FileName, KeyHandle);	//入力文字列を取得
-
-		//エンターキーで決定
-		if (Owner->InputKey->getKeyDown(KEY_INPUT_RETURN) == true)
-		{
-			type = Window_Scene::Write_EditFile;
-			Mode = WRITE_Edit;	//エディットモード上書き
-		}
-		else if (Owner->InputKey->getKeyDown(KEY_INPUT_SPACE) == true)
-		{
-			// 戻る場合
-			type = Window_Scene::Main;	//メインメニューに戻る
-
-			memset(FileName, '\0', sizeof(FileName));			//名前の文字列を再初期化
-			InitKeyInput();										//入力データを削除
-			KeyHandle = MakeKeyInput(100, false, true, false);	//キー入力ハンドルを作成
-			SetActiveKeyInput(KeyHandle);						//入力をアクティブ
-		}
-	}break;
-
-
-
-
-		//上書き確認
-	case Window_Scene::OverWrite_Check:
-	{
-		//		printf("Main\n");
-
-		CheckFile_menu->Update();
-		if (CheckFile_menu->getChangeScene() != Window_Scene::Invalid)
-		{
-			type = CheckFile_menu->getChangeScene();	//シーン切り替え
-
-			//ファイル名入力画面に戻る時
-			if (type == Window_Scene::New_File)
+			//ファイルが存在するかどうか？
+			if (CheckFile(tmp.at(0)) == true)
 			{
-				memset(FileName, '\0', sizeof(FileName));			//名前の文字列を再初期化
-				InitKeyInput();										//入力データを削除
-				KeyHandle = MakeKeyInput(100, false, true, false);	//キー入力ハンドルを作成
-				SetActiveKeyInput(KeyHandle);						//入力をアクティブ
-
+				// ファイルが存在する場合
+				type = Window_Scene::OverWrite_Check;
+				NewFile_menu->Reset();
 
 			}
-
-			Mode = WRITE_OVERRITE;	//エディットモード上書き
-
-			CheckFile_menu->Reset();	//ウインドウを最初期化
+			else
+			{
+				// ファイルがない場合
+				type = Window_Scene::SizeSet_NewFile;
+				NewFile_menu->Reset();
+			}
 		}
-	}break;
-
-
-	//　*** ファイルを上書きしてエディット画面に移行 *** 
-	case Window_Scene::WriteFile_OverWrite:
-	{
-		printf("上書き\n");	
-		memcpy(data.FileName, FileName, sizeof(data.FileName));
-		data.EditMode = Mode;
-		changeScene = true;
-
-		Type = Scene_Type::Game;
-	}break;
-
-
-	//　*** 新規ファイル作成してエディット画面に移行 *** 
-	case Window_Scene::Write_NewFile:
-	{
-		//printf("新規ファイルを作成\n");
-		memcpy(data.FileName, FileName, sizeof(data.FileName));	//
-		data.EditMode = Mode;									//
-		changeScene = true;										//
-		Type = Scene_Type::Game;								//シーン推移
-
 	}break;
 
 	
-	//　*** ファイルを編集してエディット画面に移行 *** 
-	case Window_Scene::Write_EditFile:
-	{
-		//printf("ファイルを編集\n");
-		memcpy(data.FileName, FileName, sizeof(data.FileName));	//
-		data.EditMode = Mode;									//
-		changeScene = true;										//
-		Type = Scene_Type::Game;								//シーン推移
-
-	}break;
 
 
 
 
-		
+
+
+
+
+
 	}
 
 }
@@ -231,58 +111,28 @@ void StartMenu::Draw()
 {
 	switch (type)
 	{
+
 		//メインメニュー
 	case Window_Scene::Main:
 	{
-		menu->Draw();
+		Main_menu->Draw();
 	}break;
 
 		//新規作成
 	case Window_Scene::New_File:
 	{
 		NewFile_menu->Draw();
-		DrawFormatString(NewFile_menu->getPosition().x + 20, NewFile_menu->getPosition().y + 50, GetColor(0, 100, 0), "FileName: %s", FileName);
-		DrawFormatString(NewFile_menu->getPosition().x + 10, NewFile_menu->getPosition().y + 160, GetColor(0, 100, 0), "Space: 戻る");
 	}break;
 
 
-	//新規作成のときのサイズ設定
-	case Window_Scene::SizeSet:
+	//新規作成
+	case Window_Scene::SizeSet_NewFile:
 	{
-		SizeSet_menu->Draw();
-
-
+	
 	}break;
-
-
-
-
-
-
-		//上書き確認
-	case Window_Scene::OverWrite_Check:
-	{
-		CheckFile_menu->Draw();	
-	}break;
-
-	//編集するファイル名を入力画面
-	case Window_Scene::Edit_File:
-	{
-		EditFile_menu->Draw();
-		DrawFormatString(EditFile_menu->getPosition().x + 20, EditFile_menu->getPosition().y + 50, GetColor(0, 100, 0), "FileName: %s", FileName);
-		DrawFormatString(NewFile_menu->getPosition().x + 10, NewFile_menu->getPosition().y + 160, GetColor(0, 100, 0), "Space: 戻る");
-
-
-	}break;
-
-
-
 
 
 	}
-
-
-
 
 }
 

@@ -8,7 +8,8 @@ class StartMenu;
 
 #define CELL ((int)48)	//セル
 
-#define byte unsigned char	//バイト
+typedef unsigned char byte;	//バイト
+
 
 //画面サイズ
 #define SCREEN_WIDTH ((int)(16 + 10) * CELL)
@@ -34,6 +35,8 @@ class StartMenu;
 #define WRITE_OVERRITE 0	//上書き
 #define WRITE_NEW 1			//新規作成
 #define WRITE_Edit 2		//編集
+
+
 
 
 //エディット情報

@@ -6,7 +6,7 @@
 //コンストラクタ
 Control::Control(Entry* e, std::vector<int> sprite)
 {
-	printf("X: %d\n", (SCREEN_WIDTH / CELL) / 2 * CELL);
+	//printf("X: %d\n", (SCREEN_WIDTH / CELL) / 2 * CELL);
 
 
 	Owner = e; //Entry クラス

@@ -14,7 +14,10 @@
 #include "UI.hpp"
 
 
-#define INPUT_KEY_NUMBER 100
+#define INPUT_KEY_NUMBER_MAX 100	//入力可能最大文字数
+#define INPUT_NONE 0		//入力なし
+#define INPUT_NUMBER 1		//数値入力
+#define INPUT_CHARACTER 2	//文字入力
 
 // メニュー推移
 enum class Window_Scene
@@ -39,7 +42,7 @@ enum class Window_Scene
 	Edit_File,
 
 	SizeSet,	//サイズを指定
-
+	SizeSet_NewFile,
 
 	OverWrite_Check,	//上書きチェック
 
@@ -54,16 +57,23 @@ enum class Window_Scene
 	None, //シーン推移ではない。
 };
 
-//ウインドウの項目
+// ##### ウインドウの項目
 typedef struct List_Item
 {
 	glm::ivec2 pos;			// 座標
 	glm::ivec2 size;		//サイズ
 	std::string name;		// 名前
 	Window_Scene winScene;	// メニュー推移
-	unsigned char ID;		// アイテムID
-	unsigned int Color;		//描画色
-	char InputKeyData[INPUT_KEY_NUMBER];	//入力データ
+	byte ID;				// アイテムID
+	unsigned int Fore_Color;	//前景色
+	unsigned int Back_Color;	//背景色
+
+	//入力関係
+	bool isInput_String;	//文字列入力かどうか？
+	bool isInput_Number;	//数値入力かどうか？
+	int InputHandle;		//キー入力ハンドル
+
+	char InputKeyData[INPUT_KEY_NUMBER_MAX];	//入力データ
 
 }List_Item;
 
@@ -81,29 +91,25 @@ class Window : public Actor
 {
 public:
 
-
 	Window(Entry* e, Window_Scene s, glm::ivec2 pos, glm::ivec2 size);	//コンストラクタ
-	~Window();							//デストラクタ
-
-
-
-
+	~Window();															//デストラクタ
 
 	// ################## 設定　関係
 	void setTitle(std::string name, unsigned int c);	//タイトル
 	void setPosition(glm::ivec2 pos);					//座標
 	void setSize(glm::ivec2 size);						//サイズ
 	void setBackColor(unsigned int c);					//背景色
-	void setInputNumber();								//数値を入力するかどうか？
-	void AddList_Down(Window_Scene s, std::string name, unsigned char num, unsigned int c); //ウインドウに項目を追加
+	void setInput_String();								//文字列を入力するかどうか？
+	void AddList_Down(Window_Scene s, std::string name, byte , unsigned int c, unsigned int b, byte input = 0);			//ウインドウに項目を追加
+	void Reset();	//設定をリセット
+	void setCursorSelectBackColor(unsigned int c);	//カーソルの選択背景色
+	void setSentence(const char* stc);				//文章を追加
 
-	void Reset();
-	unsigned char getItem();
 
-
-	
-	Window_Scene getChangeScene();									//シーン推移を取得
-	
+	// ################## 取得　関係
+	Window_Scene getChangeScene();				//シーン推移を取得
+	std::vector<char*> getInputKeyData();	//キー入力情報			
+	byte getItem();	//識別子IDを取得
 
 
 	void Update();	//計算
@@ -117,12 +123,18 @@ private:
 	unsigned int TitleColor;			//タイトル色
 
 
+	//テスト
+
+	char name[INPUT_KEY_NUMBER_MAX];
+	char size_x[INPUT_KEY_NUMBER_MAX];
+	char size_y[INPUT_KEY_NUMBER_MAX];
 
 
 
-	unsigned int BackGroundColor;		//背景色
+	unsigned int BackGroundColor;		//ウインドウ背景色
+	unsigned int CursorSelectColor;		//カーソルの選択時の背景色
 
-
+	std::vector<std::string> InputKeyData;	//キー入力を返す
 
 	std::vector<List_Item> lists;		//メニュー項目
 	
@@ -135,12 +147,15 @@ private:
 	
 
 	glm::ivec2 ItemPos;	//項目の座標を調整
-	int KeyInputNumber_Handle;	//数値入力ハンドル
 
-	char size_x[INPUT_KEY_NUMBER];
-	char size_y[INPUT_KEY_NUMBER];
+	int KeyInput_String_Handle;	//文字入力ハンドル
+	int KeyInput_Number_Handle;	//数値入力ハンドル
 
-	bool isInputNumber;//数値を入力するかどうか？
+	std::vector<std::vector<std::string>> sentenceLine;	//文章
+
+	bool isInput_Number;	//数値を入力するかどうか？
+	bool isInput_String;	//文字列を入力するかどうか？
+	bool isCusorBackColor;	//カーソル選択時の項目の背景色を変えるかどうか？
 
 
 };

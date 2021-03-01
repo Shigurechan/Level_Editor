@@ -31,15 +31,22 @@ public:
 
 	bool changeScene;	//シーンを切り替える
 private:
-	int KeyHandle;	//キー入力ハンドル
-	char FileName[256] = { '\0' };	//入力したファイル名
-
 	
-	std::shared_ptr<Window> menu;				//メインシーン
+	std::shared_ptr<Window> Main_menu;				//メインシーン
 	std::shared_ptr<Window> NewFile_menu;		//新規作成でファイル名入力シーン
 	std::shared_ptr<Window> EditFile_menu;		//編集するファイル名入力シーン
 	std::shared_ptr<Window> CheckFile_menu;		//新規作成でファイルがあるかどうか確認シーン
-	std::shared_ptr<Window> SizeSet_menu;		//ステージサイズを設定するシーン
+
+	std::shared_ptr<Window> SizeSet_NewFile_menu;		//新規作成でステージサイズを設定するシーン
+
+
+
+
+	std::shared_ptr<Window> test_menu;	//テスト用
+
+
+
+
 
 
 
@@ -49,7 +56,7 @@ private:
 	EditData data;	//エディット内容をエディターに伝える
 	byte Mode;		//モード
 	bool CheckFile(const char* FileName);	//ファイルが存在するかどうか？
-
+	char FileName[100] = { '\0' };
 };
 
 #endif
