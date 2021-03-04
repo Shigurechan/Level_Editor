@@ -21,14 +21,6 @@ Game_Scene::Game_Scene(Scene_Type t,Entry *e) : Scene_base(t,e)
 	SpriteList.push_back(Owner->LoadSprite("Sprite_Data/Brick.png"));
 	SpriteList.push_back(Owner->LoadSprite("Sprite_Data/Shop.png"));
 
-
-
-
-
-
-
-
-
 	// #####　コンポーネント #####
 	stage = std::make_shared<Stage>(Owner,SpriteList);				//マップ描画
 	control = std::make_shared<Control>(Owner,SpriteList);			//操作
@@ -40,27 +32,30 @@ Game_Scene::Game_Scene(Scene_Type t,Entry *e) : Scene_base(t,e)
 //初期化
 void Game_Scene::SetUp()
 {
-
-
 	//新規作成
 	if (Data.EditMode == (byte)WRITE_NEW)
 	{
-		printf("新規ファイルを作成\n");
-
-		FILE* fp = NULL;	//ファイルポインタ
-		fopen_s(&fp, Data.FileName, "wb"); //書き込み専用モード
-		fclose(fp);	//ファイルを閉じる
+		//printf("新規ファイルを作成\n");	
+		stage->NewFile(Data);	//ファイルを新規作成
+		control->setPos(Data.StageSize);	//初期カーソル座標
 	}
-	else if (Data.EditMode == (byte)WRITE_Edit)
+	else if (Data.EditMode == (byte)WRITE_EDIT)
 	{
-		printf("ファイル編集\n");
+		//printf("ファイル編集\n");
 		stage->ReadFile(Data);	//ファイルを読み込み
+		control->setPos(Data.StageSize);	//初期カーソル座標
 
 	}
 	else if (Data.EditMode == (byte)WRITE_OVERRITE)
 	{
-		printf("上書き作成\n");
+		//printf("上書き作成\n");
 		stage->ReadFile(Data);	//ファイルを読み込み
+		control->setPos(Data.StageSize);	//初期カーソル座標
+
+	}
+	else 
+	{
+		//printf("Error 未設定 Data.EditMode : %d\n",Data.EditMode);
 	}
 }
 
@@ -74,8 +69,9 @@ void Game_Scene::Update()
 	control->Update();
 
 	//グリッドの書き込む
-	if ( control->isWrite_cell == true ){
-		stage->setGrid(control->getChip());
+	if ( control->isWrite_cell == true )
+	{
+		stage->setGrid(control->getChip(),control->getScreenGridPos());
 	}
 
 	//バイナリファイルにステージ情報を書き込むかどうか？
@@ -85,8 +81,9 @@ void Game_Scene::Update()
 		control->isWrite_File = false;
 	}
 
-	stage->Scroll(control->getMove());	//画面スクロール
-
+	
+	stage->Scroll(control);	//画面スクロール
+	
 
 
 
@@ -96,9 +93,16 @@ void Game_Scene::Update()
 
 
 //エディットデータを取得
-void Game_Scene::getEditData(EditData data)
+void Game_Scene::setEditData(EditData data)
 {
-	Data = data;
+	if (isEditScene == false) 
+	{
+		Data = data;
+		SetUp();
+
+		isEditScene = true;
+	}
+
 }
 
 

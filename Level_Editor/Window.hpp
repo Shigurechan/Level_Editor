@@ -14,7 +14,6 @@
 #include "UI.hpp"
 
 
-#define INPUT_KEY_NUMBER_MAX 100	//入力可能最大文字数
 #define INPUT_NONE 0		//入力なし
 #define INPUT_NUMBER 1		//数値入力
 #define INPUT_CHARACTER 2	//文字入力
@@ -38,13 +37,20 @@ enum class Window_Scene
 	Yes,
 	No,
 
-	New_File,
-	Edit_File,
 
-	SizeSet,	//サイズを指定
-	SizeSet_NewFile,
+	SizeSetOverWrite,
+
+	New_File,		//新規作成
+	Edit_File,		//編集
+
+	SizeSetError,	//サイズ指定のエラー
+
+	SizeSet,		//サイズを指定
 
 	OverWrite_Check,	//上書きチェック
+
+	CheckFileError,	//ファイルが存在するかどうか確認画面
+
 
 	WriteFile_OverWrite,	//上書き作成
 	Write_NewFile,			//新規作成	

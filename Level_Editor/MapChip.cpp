@@ -48,6 +48,7 @@ void MapChip::Update()
 void MapChip::Draw()
 {
 	DrawRotaGraph(mPosition.x + CELL / 2,mPosition.y + CELL / 2,1.0,0,sprite,false);
+
 }
 
 

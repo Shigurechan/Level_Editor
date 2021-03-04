@@ -13,7 +13,7 @@ Entry::Entry()
 	game = std::make_shared<Game_Scene>(Scene_Type::Game, this);
 	start = std::make_shared<StartMenu>(Scene_Type::Title, this);
 
-	type = Scene_Type::Title;	//最初のシーン
+	Scene = Scene_Type::Title;	//最初のシーン
 }
 
 //スプライトをロード
@@ -23,7 +23,7 @@ int Entry::LoadSprite(const char* FileName)
 
 	if (a == -1)
 	{
-		printf("ファイルが存在しません。%s \n",FileName);
+		printf("ファイルが存在しません。Path: %s \n",FileName);
 		return -1;
 	}
 	else {
@@ -38,44 +38,25 @@ int Entry::LoadSprite(const char* FileName)
 //計算
 void Entry::Update()
 {
-
 	InputKey->Update();
 
-	switch (type)
+	switch (Scene)	
 	{
-
 
 		//タイトル
 	case Scene_Type::Title:
 	{
-		start->Update();
-		type = start->getSceneType();
-
-		if (start->changeScene == true)
-		{
-			data = start->getData();
-		}
-
-
+		start->Update();				//更新
+		Scene = start->getSceneType();	//シーン推移
+		mData = start->getEditData();	//エディットデータを取得
 	}break;
-
-
-
 
 		//メインゲーム
 	case Scene_Type::Game:
 	{
-		//一回だけ
-		if (start->changeScene == true)
-		{
-			game->getEditData(data);
-			start->changeScene = false;
-			game->SetUp();
-		}
-
-
-		game->Update();
-		type = game->getSceneType();
+		game->Update();					//更新
+		game->setEditData(mData);		//エディットデータを設定
+		Scene = game->getSceneType();	//シーン推移
 	}break;
 
 
@@ -87,14 +68,14 @@ void Entry::Update()
 //描画
 void Entry::Draw()
 {
-	switch (type)
+	switch (Scene)
 	{
 
 	//タイトル
 	case Scene_Type::Title:
 	{
 		start->Draw();
-		type = start->getSceneType();
+		Scene = start->getSceneType();
 	}break;
 
 
@@ -102,7 +83,7 @@ void Entry::Draw()
 	case Scene_Type::Game:
 	{
 		game->Draw();
-		type = game->getSceneType();
+		Scene = game->getSceneType();
 	}break;
 
 

@@ -19,40 +19,48 @@ class Entry;
 * マウスとキーボードによる操作　関係のクラス
 ######################################################*/
 
-class Control
+class Control 
 {
 public:
 	Control(Entry* e,std::vector<int> sprite);	//コンストラクタ
-	~Control();			//デストラクタ
-
-
+	~Control();									//デストラクタ
 
 	void Update();	//更新
-
 	void Draw();	//描画
 
-	glm::ivec2 getMove();
-	MapChip getChip();	//マップチップ
+
+	// ##### 設定
+	void setPos(glm::ivec2 size);	//カーソル座標
+	void setGridPos(glm::ivec2 g);	//グリッド座標を設定
+	void setScreenGridPos(glm::ivec2 p);	//スクリーンのグリッド座標を取得
+
+
+	// ##### 取得　
+	MapChip getChip();				//マップチップ
+	glm::ivec2 getGridPos();		//グリッド座標を取得
+	glm::ivec2 getVector();			//向き
+	glm::ivec2 getScreenGridPos();	//スクリーンのグリッド座標を取得
+
+
 
 	bool isWrite_cell;	//書き込むかどうか？
 	bool isWrite_File;	//ステージ情報をバイナリファイルに書き込むかどうか？
-
 private:
-	glm::ivec2 CursorPos;	//カーソルの場所
-	glm::ivec2 GridPos;		//グリッドの場所
-	glm::ivec2 ScrollMove;	//スクロールする向き
+	glm::ivec2 Screen_GridPos;	//画面上のグリッド座標
+	glm::ivec2 GridPos;			//ステージのグリッド座標
 
+	glm::ivec2 ScrollMove;	//スクロールする向き
+	glm::ivec2 mVector;		//向き
 
 	MapChip chip;	//書き込む情報
-	std::vector<int> SpriteList;	//スプライトリスト
 	std::shared_ptr<Animation> anim;
+	std::vector<int> SpriteList;	//スプライトリスト
 
 	//長押し
-	bool HoldKey_X;
 	bool HoldKey_Y;
-
-
-	Entry* Owner;			//Entry クラス
+	bool HoldKey_X;
+	
+	Entry* Owner;	//Entryクラス
 };
 
 

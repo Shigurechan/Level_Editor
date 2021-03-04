@@ -25,7 +25,7 @@ public:
 	void Update();	//更新
 	void Draw();	//描画
 
-	void getEditData(EditData data);	//エディットデータを取得
+	void setEditData(EditData data);	//エディットデータを取得
 private:
 
 
@@ -35,6 +35,8 @@ private:
 
 	EditData Data;	//エディットデータを取得
 	Entry* Owner;	//Entry クラス
+
+	bool isEditScene = false;//エディットシーンに推移
 };
 
 #endif

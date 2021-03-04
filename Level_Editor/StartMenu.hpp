@@ -27,7 +27,7 @@ public:
 	void Update();	//更新
 	void Draw();	//描画
 
-	EditData getData();	//ファイル情報を返す
+	EditData getEditData();	//ファイル情報を返す
 
 	bool changeScene;	//シーンを切り替える
 private:
@@ -36,8 +36,11 @@ private:
 	std::shared_ptr<Window> NewFile_menu;		//新規作成でファイル名入力シーン
 	std::shared_ptr<Window> EditFile_menu;		//編集するファイル名入力シーン
 	std::shared_ptr<Window> CheckFile_menu;		//新規作成でファイルがあるかどうか確認シーン
+	
+	std::shared_ptr<Window> SizeSet_menu;		//新規作成でステージサイズを設定するシーン
+	std::shared_ptr<Window> SizeSetError_menu;		//サイズを設定しない時の表示
 
-	std::shared_ptr<Window> SizeSet_NewFile_menu;		//新規作成でステージサイズを設定するシーン
+	std::shared_ptr<Window> CheckFileError_menu;		//ファイルが存在しない時のウインドウ
 
 
 
@@ -51,12 +54,12 @@ private:
 
 
 
-	Window_Scene type;	//ウインドウシーン推移
+	Window_Scene mNowScene;	//現在のウインドウシーン推移
 
 	EditData data;	//エディット内容をエディターに伝える
 	byte Mode;		//モード
 	bool CheckFile(const char* FileName);	//ファイルが存在するかどうか？
-	char FileName[100] = { '\0' };
+	char FileName[INPUT_KEY_NUMBER_MAX] = { '\0' };
 };
 
 #endif

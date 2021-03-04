@@ -2,13 +2,28 @@
 #define ___ENTRY_HPP_
 
 #include "Input.hpp"
+#include "glm/glm.hpp"
+
 #include <iostream>
+
 class Game_Scene;
 class StartMenu;
 
 #define CELL ((int)48)	//セル
 
 typedef unsigned char byte;	//バイト
+
+
+#define INPUT_KEY_NUMBER_MAX 100	//入力可能最大文字数
+
+
+
+#define SCROLL_OFFSET_RIGHT 18
+#define SCROLL_OFFSET_LEFT 6
+
+
+#define SCROLL_OFFSET_UP 4
+#define SCROLL_OFFSET_DOWN 15
 
 
 //画面サイズ
@@ -28,13 +43,14 @@ typedef unsigned char byte;	//バイト
 #define VECTOR_DOWN glm::ivec2(0,1)
 #define VECTOR_LEFT glm::ivec2(-1,0)
 #define VECTOR_RIGHT glm::ivec2(1,0)
+#define VECTOR_None glm::ivec2(0,0)
 
 #define PI ((float)3.14159265359)	//PI
 
 //ファイルモード
 #define WRITE_OVERRITE 0	//上書き
 #define WRITE_NEW 1			//新規作成
-#define WRITE_Edit 2		//編集
+#define WRITE_EDIT 2		//編集
 
 
 
@@ -43,7 +59,8 @@ typedef unsigned char byte;	//バイト
 typedef struct EditData
 {
 	byte EditMode;			//エディットモード
-	char FileName[200];	//書き込むファイル名
+	char FileName[INPUT_KEY_NUMBER_MAX];		//書き込むファイル名
+	glm::ivec2 StageSize;	//ステージのサイズ
 
 
 }EditData;
@@ -91,9 +108,11 @@ private:
 
 	std::shared_ptr<StartMenu> start;	//ファイル選択画面
 
-	Scene_Type type;
+	Scene_Type Scene;		//現在のシーン
+	Scene_Type Prev_Scene;	//前のシーン
 
-	EditData data;
+	bool changeScene = false; //シーン切り替え
+	EditData mData;
 };
 
 
