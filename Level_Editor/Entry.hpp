@@ -52,7 +52,13 @@ typedef unsigned char byte;	//バイト
 #define WRITE_NEW 1			//新規作成
 #define WRITE_EDIT 2		//編集
 
-
+//スプライト情報
+typedef struct SpriteData
+{
+	int sprite;			//スプライト
+	byte bin;			//バイナリ
+	std::string name;	//スプライト名
+}SpriteData;
 
 
 //エディット情報

@@ -5,9 +5,11 @@
 #include <Dxlib.h>
 #include "MapChip.hpp"
 #include "Animation.hpp"
+#include "Window.hpp"
 
 #include "glm/glm.hpp"
 #include <vector>
+#include <map>
 #include <iostream>
 
 class Entry;
@@ -22,7 +24,7 @@ class Entry;
 class Control 
 {
 public:
-	Control(Entry* e,std::vector<int> sprite);	//コンストラクタ
+	Control(Entry* e, std::vector<SpriteData> sprite);	//コンストラクタ
 	~Control();									//デストラクタ
 
 	void Update();	//更新
@@ -46,6 +48,10 @@ public:
 	bool isWrite_cell;	//書き込むかどうか？
 	bool isWrite_File;	//ステージ情報をバイナリファイルに書き込むかどうか？
 private:
+
+	void MenuUpdate();	//更新
+	void MenuDraw();	//描画
+
 	glm::ivec2 Screen_GridPos;	//画面上のグリッド座標
 	glm::ivec2 GridPos;			//ステージのグリッド座標
 
@@ -53,8 +59,23 @@ private:
 	glm::ivec2 mVector;		//向き
 
 	MapChip chip;	//書き込む情報
-	std::shared_ptr<Animation> anim;
-	std::vector<int> SpriteList;	//スプライトリスト
+
+	std::shared_ptr<Animation> anim;	//カーソルアニメーション
+
+	std::vector<SpriteData> SpriteList;	//スプライト情報リスト
+
+
+
+	//　メニュー関係
+	bool isMenu = false;	//メニュー画面かどうか？
+	std::shared_ptr<Window> menu;	//メニューウインドウ
+
+
+
+
+
+
+
 
 	//長押し
 	bool HoldKey_Y;

@@ -3,30 +3,69 @@
 #include "Control.hpp"
 
 #include <filesystem>
+#include <map>
 
 namespace fs = std::filesystem;
 
 //コンストラクタ
-Game_Scene::Game_Scene(Scene_Type t,Entry *e) : Scene_base(t,e)
+Game_Scene::Game_Scene(Scene_Type t, Entry* e) : Scene_base(t, e)
 {
 	Owner = e;	//Entry クラス
 
 
 	// #####　スプライトをロード #####
-
-	std::vector<int> SpriteList;	//スプライトリスト
-
+	std::vector<SpriteData> SpriteList;	//スプライトリスト
+	
+	//読み込みファイルパスを設定
+	std::string filename = "/Sprite_Data/";
+	std::string path = fs::current_path().string();
+	path = path + filename;
+	
 	//スプライト読み込み
-	SpriteList.push_back(Owner->LoadSprite("Sprite_Data/Block.png"));
-	SpriteList.push_back(Owner->LoadSprite("Sprite_Data/Brick.png"));
-	SpriteList.push_back(Owner->LoadSprite("Sprite_Data/Shop.png"));
+	
+	for (fs::directory_iterator itr = fs::directory_iterator(path); itr != fs::directory_iterator(); itr++)
+	{
+		printf("%s\n",itr->path().string().c_str());
+
+		SpriteData data;	//スプライトデータ
+
+		data.sprite = Owner->LoadSprite(itr->path().string().c_str());	//スプライトを設定
+
+		std::string name = itr->path().filename().string();	//ファイル名を取得
+		data.name = name;	//ファイル名を設定
+
+		if (data.name == "Block.png")
+		{
+			data.bin = 0x01;
+		}
+		else if (data.name == "Brick.png")
+		{
+			data.bin = 0x02;
+		}
+		else if (data.name == "Shop.png")
+		{
+			data.bin = 0x03;
+		}
+		else {
+			printf("バイナリ情報未設定: %s\n",data.name);
+		}
+
+		SpriteList.push_back(data);	//スプライト		
+	}
+	
+	
+
+
+
+
+
+
+
+
 
 	// #####　コンポーネント #####
 	stage = std::make_shared<Stage>(Owner,SpriteList);				//マップ描画
-	control = std::make_shared<Control>(Owner,SpriteList);			//操作
-
-
-
+	control = std::make_shared<Control>(Owner,SpriteList);	//操作
 }
 
 //初期化
@@ -109,8 +148,8 @@ void Game_Scene::setEditData(EditData data)
 //描画
 void Game_Scene::Draw()
 {
-	control->Draw();
 	stage->Draw();
+	control->Draw();
 
 
 }

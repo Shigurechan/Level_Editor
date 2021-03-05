@@ -2,15 +2,12 @@
 #include "Control.hpp"
 
 //コンストラクタ
-Stage::Stage(Entry* e, std::vector<int> spriteList)
+Stage::Stage(Entry* e, std::vector<SpriteData> sprite)
 {	
-	Owner = e;
-	SpriteList = spriteList;
-
-	mStage = std::make_shared <std::vector<std::vector<MapChip>>>();
+	Owner = e;	//Entry クラス
 	
-	
-	
+	SpriteList = sprite;	//スプライトリスト
+	mStage = std::make_shared <std::vector<std::vector<MapChip>>>();	//ステージ配列		
 }
 
 //グリッドに書き込む
@@ -34,9 +31,6 @@ void Stage::setGrid(MapChip chip, glm::ivec2 screen_grid)
 	{
 		pos.y = SCROLL_OFFSET_UP;
 	}
-
-
-
 
 	try {
 		mStage->at(chip.getPosition().y).at(chip.getPosition().x).setBinary(chip.getBinary());				//バイナリを設定
@@ -105,40 +99,42 @@ void Stage::ReadFile(EditData data)
 	printf("ファイル読み込み\n");
 
 	FILE* fp = NULL;
-	printf("FileName: %s\n", data.FileName);
-	fopen_s(&fp, data.FileName, "rb");	//読み込みモードでバイナリファイルを開く
-		
-	//先頭８バイトはステージのサイズ
-	fread(&mSize.x, sizeof(int), 1, fp);
-	fread(&mSize.y, sizeof(int), 1, fp);
 	
-	std::vector<MapChip> map;
-	for (int y = 0; y < mSize.y; y++)
-	{	
-		map.clear();	//要素を空にする
-		for (int x = 0; x < mSize.x; x++)
+		printf("FileName: %s\n", data.FileName);
+		fopen_s(&fp, data.FileName, "rb");	//読み込みモードでバイナリファイルを開く
+		if (fp != NULL)
 		{
-			map.push_back(MapChip());	//要素を追加
+			//先頭８バイトはステージのサイズ
+			fread(&mSize.x, sizeof(int), 1, fp);
+			fread(&mSize.y, sizeof(int), 1, fp);
 
-			byte b = 0;
-			fread(&b, sizeof(byte), 1, fp);							//バイナリファイルから１バイト読み込み
-
-			map.back().setBinary(b);								//バイナリを設定
-			map.back().setPosition(glm::ivec2(x * CELL, y * CELL));	//座標を設定
-
-			//オブジェクトが無い場合
-			if (b == 0x00) {
-				map.back().setSprite(0);	//スプライトなし
-			}
-			else if (b > 0x00)
+			std::vector<MapChip> map;
+			for (int y = 0; y < mSize.y; y++)
 			{
-				//オブジェクトがある場合
-				map.back().setSprite(SpriteList.at(b - 1));	//スプライトを設定
+				map.clear();	//要素を空にする
+				for (int x = 0; x < mSize.x; x++)
+				{
+					map.push_back(MapChip());	//要素を追加
+
+					byte b = 0;
+					fread(&b, sizeof(byte), 1, fp);							//バイナリファイルから１バイト読み込み
+
+					map.back().setBinary(b);								//バイナリを設定
+					map.back().setPosition(glm::ivec2(x * CELL, y * CELL));	//座標を設定
+
+					//オブジェクトが無い場合
+					if (b == 0x00) {
+						map.back().setSprite(0);	//スプライトなし
+					}
+					else if (b > 0x00)
+					{
+						//オブジェクトがある場合
+						map.back().setSprite(SpriteList.at(b - 1).sprite);	//スプライトを設定
+					}
+				}
+				mStage->push_back(map);	//ステージに書き込む
 			}
 		}
-		mStage->push_back(map);	//ステージに書き込む
-	}
-
 	fclose(fp);	//ファイルを閉じる。
 }
 
@@ -211,14 +207,6 @@ void Stage::Scroll(std::shared_ptr<Control> control)
 			}
 		}
 	}
-
-
-
-
-
-
-
-
 }
 
 

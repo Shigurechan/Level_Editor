@@ -6,6 +6,7 @@
 #include <Dxlib.h>
 #include <array>
 #include <vector>
+#include <map>
 #include <iostream>
 
 /*####################################################
@@ -21,7 +22,7 @@ class Control;	//操作
 class Stage
 {
 public:
-	Stage(Entry *e,std::vector<int> spriteList);	//コンストラクタ
+	Stage(Entry *e, std::vector<SpriteData> sprite);	//コンストラクタ
 	~Stage();	//デストラクタ
 
 	void Update();		//計算
@@ -37,7 +38,7 @@ private:
 
 	glm::ivec2 mSize;	//サイズ
 	std::shared_ptr<std::vector<std::vector<MapChip>>> mStage;	//ステージ
-	std::vector<int> SpriteList;	//スプライトリスト
+	std::vector<SpriteData> SpriteList;	//スプライトリスト
 	Entry* Owner;
 	
 };
