@@ -25,6 +25,7 @@ public:
 	Scene_Type getSceneType();	//シーンタイプを取得
 protected:
 
+	
 	Scene_Type Type;	//シーンタイプ
 	Entry* Owner;		//Entry クラス
 

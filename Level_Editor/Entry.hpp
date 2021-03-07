@@ -14,7 +14,7 @@ class StartMenu;
 typedef unsigned char byte;	//バイト
 
 
-#define INPUT_KEY_NUMBER_MAX 100	//入力可能最大文字数
+#define INPUT_KEY_NUMBER_MAX 500	//入力可能最大文字数
 
 
 
@@ -107,6 +107,7 @@ public:
 
 
 	std::shared_ptr<Input> InputKey;	//キー入力
+	std::string GetDrugPath();			//D&Dパス
 
 private:
 

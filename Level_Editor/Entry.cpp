@@ -33,6 +33,19 @@ int Entry::LoadSprite(const char* FileName)
 
 
 
+std::string Entry::GetDrugPath()
+{
+	//	printf("Command %s\n\n", GetCommandLine());
+	std::string cmd(GetCommandLine());
+	int all = cmd.length();	//全部の文字列
+	int f = cmd.find(' ');	//取り出す位置
+	cmd = cmd.substr((f + 1), all - f);
+
+	printf("%s ",cmd.c_str());
+	return cmd;
+}
+
+
 
 
 //計算

@@ -60,6 +60,8 @@ private:
 	byte Mode;		//モード
 	bool CheckFile(const char* FileName);	//ファイルが存在するかどうか？
 	char FileName[INPUT_KEY_NUMBER_MAX] = { '\0' };
+	std::string DDPath;
+
 };
 
 #endif

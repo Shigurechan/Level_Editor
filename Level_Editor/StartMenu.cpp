@@ -15,7 +15,10 @@ StartMenu::StartMenu(Scene_Type t, Entry* e) : Scene_base(t,e)
 
 	mNowScene = Window_Scene::Main;	//最初のシーン
 	changeScene = false;	//シーンを切り替える
-		
+
+	DDPath = Owner->GetDrugPath();	//ドラックパス
+
+	
 	//メインメニュー
 	Main_menu = std::make_shared<Window>(e,Window_Scene::Main,glm::ivec2(100,100),glm::ivec2(200,200));
 	Main_menu->setTitle("ファイルメニュー",GetColor(0,0,0));
@@ -63,201 +66,205 @@ StartMenu::StartMenu(Scene_Type t, Entry* e) : Scene_base(t,e)
 //更新
 void StartMenu::Update()
 {
-	switch (mNowScene)
-	{
+	if (DDPath != "\0") {
+		memcpy(data.FileName, DDPath.c_str(), sizeof(data.FileName));	//ファイル名を設定	
 
-		//メインメニュー
-	case Window_Scene::Main:
-	{
-		Main_menu->Update(); //更新
-	
-		if (Main_menu->getChangeScene() != Window_Scene::Invalid) 
+		Type = Scene_Type::Game;								//Game シーンに移動
+		data.EditMode = WRITE_EDIT;								//エディットモード
+
+	}
+	else {
+
+		switch (mNowScene)
 		{
-			//新規作成
-			if (Main_menu->getChangeScene() == Window_Scene::New_File)
-			{
-				mNowScene = Window_Scene::New_File; //新規作成ウインドウに移行
-			}
-			else if (Main_menu->getChangeScene() == Window_Scene::Edit_File)
-			{
-				//エディット
-				mNowScene = Window_Scene::Edit_File; //編集ウインドウに移行
-			}
-			Main_menu->Reset();	//ウインドウをリセット
-		}
-	}break;
-	
-		//編集
-	case Window_Scene::Edit_File:
-	{
-		EditFile_menu->Update(); //更新
 
-		if (EditFile_menu->getChangeScene() != Window_Scene::Invalid)
+			//メインメニュー
+		case Window_Scene::Main:
 		{
-			std::vector<char*> tmp = EditFile_menu->getInputKeyData();	//キー入力を取得
+			Main_menu->Update(); //更新
 
-			//決定
-			if (EditFile_menu->getChangeScene() == Window_Scene::Yes)
+			if (Main_menu->getChangeScene() != Window_Scene::Invalid)
 			{
-				if (CheckFile(tmp.at(0)) == true) 
+				//新規作成
+				if (Main_menu->getChangeScene() == Window_Scene::New_File)
 				{
-					//ファイルが存在する時
-
-					memcpy(data.FileName, tmp.at(0), sizeof(data.FileName));	//ファイル名を設定	
-					Type = Scene_Type::Game;								//Game シーンに移動
-					data.EditMode = WRITE_EDIT;								//エディットモード
-
-	
+					mNowScene = Window_Scene::New_File; //新規作成ウインドウに移行
 				}
-				else {
-					//ファイルが存在しない時
-					memcpy(FileName, tmp.at(0), sizeof(FileName));	//ファイル名をコピー
-					mNowScene = Window_Scene::CheckFileError; //ファイルがありませんエラーシーンに推移
+				else if (Main_menu->getChangeScene() == Window_Scene::Edit_File)
+				{
+					//エディット
+					mNowScene = Window_Scene::Edit_File; //編集ウインドウに移行
 				}
+				Main_menu->Reset();	//ウインドウをリセット
 			}
-			
-			EditFile_menu->Reset();	//ウインドウをリセット
-		}
-	}break;
+		}break;
+
+		//編集
+		case Window_Scene::Edit_File:
+		{
+			EditFile_menu->Update(); //更新
+
+			if (EditFile_menu->getChangeScene() != Window_Scene::Invalid)
+			{
+				std::vector<char*> tmp = EditFile_menu->getInputKeyData();	//キー入力を取得
+
+				//決定
+				if (EditFile_menu->getChangeScene() == Window_Scene::Yes)
+				{
+					if (CheckFile(tmp.at(0)) == true)
+					{
+						//ファイルが存在する時
+
+						memcpy(data.FileName, tmp.at(0), sizeof(data.FileName));	//ファイル名を設定	
+						Type = Scene_Type::Game;								//Game シーンに移動
+						data.EditMode = WRITE_EDIT;								//エディットモード
+
+
+					}
+					else {
+						//ファイルが存在しない時
+						memcpy(FileName, tmp.at(0), sizeof(FileName));	//ファイル名をコピー
+						mNowScene = Window_Scene::CheckFileError; //ファイルがありませんエラーシーンに推移
+					}
+				}
+
+				EditFile_menu->Reset();	//ウインドウをリセット
+			}
+		}break;
 
 		//ファイルが存在しない時
-	case Window_Scene::CheckFileError:
-	{
-		CheckFileError_menu->Update(); //更新
+		case Window_Scene::CheckFileError:
+		{
+			CheckFileError_menu->Update(); //更新
 
-		if (CheckFileError_menu->getChangeScene() != Window_Scene::Invalid)
-		{		
-			//決定
-			if (CheckFileError_menu->getChangeScene() == Window_Scene::Yes)
+			if (CheckFileError_menu->getChangeScene() != Window_Scene::Invalid)
 			{
-				mNowScene = Window_Scene::Edit_File; //編集ファイル名入力ウインドウに戻る
+				//決定
+				if (CheckFileError_menu->getChangeScene() == Window_Scene::Yes)
+				{
+					mNowScene = Window_Scene::Edit_File; //編集ファイル名入力ウインドウに戻る
+				}
+				CheckFileError_menu->Reset();	//ウインドウをリセット
 			}
-			CheckFileError_menu->Reset();	//ウインドウをリセット
-		}
-	}break;
+		}break;
 
 		//新規作成
-	case Window_Scene::New_File:
-	{
-		NewFile_menu->Update();	//更新
-
-		if (NewFile_menu->getChangeScene() != Window_Scene::Invalid) 
+		case Window_Scene::New_File:
 		{
-			//決定の時
-			if (NewFile_menu->getChangeScene() == Window_Scene::Yes)
+			NewFile_menu->Update();	//更新
+
+			if (NewFile_menu->getChangeScene() != Window_Scene::Invalid)
 			{
-				std::vector<char*> tmp = NewFile_menu->getInputKeyData();	//入力データを取得
-
-				//ファイル名が存在するかどうか？
-				if (CheckFile(tmp.at(0)) == true)
+				//決定の時
+				if (NewFile_menu->getChangeScene() == Window_Scene::Yes)
 				{
-					//存在する場合
+					std::vector<char*> tmp = NewFile_menu->getInputKeyData();	//入力データを取得
 
-					memcpy(FileName, tmp.at(0), sizeof(FileName));	//ファイル名を取得
-					mNowScene = Window_Scene::Check;				//上書き確認ウインドウに移行
+					//ファイル名が存在するかどうか？
+					if (CheckFile(tmp.at(0)) == true)
+					{
+						//存在する場合
 
+						memcpy(FileName, tmp.at(0), sizeof(FileName));	//ファイル名を取得
+						mNowScene = Window_Scene::Check;				//上書き確認ウインドウに移行
+
+					}
+					else {
+						//存在しない場合
+
+						memcpy(FileName, tmp.at(0), sizeof(data.FileName));	//ファイル名を取得
+						mNowScene = Window_Scene::SizeSet; //サイズ設定ウインドウに移行
+
+					}
 				}
-				else {
-					//存在しない場合
 
-					memcpy(FileName, tmp.at(0), sizeof(data.FileName));	//ファイル名を取得
-					mNowScene = Window_Scene::SizeSet; //サイズ設定ウインドウに移行
-
-				}
+				NewFile_menu->Reset(); //ウインドウをリセット
 			}
-
-			NewFile_menu->Reset(); //ウインドウをリセット
-		}
-	}break;
+		}break;
 
 		//サイズ指定
-	case Window_Scene::SizeSet:
-	{
-		SizeSet_menu->Update();	//更新
+		case Window_Scene::SizeSet:
+		{
+			SizeSet_menu->Update();	//更新
 
-		if (SizeSet_menu->getChangeScene() != Window_Scene::Invalid) {
+			if (SizeSet_menu->getChangeScene() != Window_Scene::Invalid) {
 
-			//決定
-			if (SizeSet_menu->getChangeScene() == Window_Scene::Yes)
+				//決定
+				if (SizeSet_menu->getChangeScene() == Window_Scene::Yes)
+				{
+					std::vector<char*> tmp = SizeSet_menu->getInputKeyData();	//入力データーを取得
+
+					//サイズを設定
+					data.StageSize.x = atoi(tmp.at(0));	//X
+					data.StageSize.y = atoi(tmp.at(1));	//Y
+
+					// ステージサイズが不正かどうか？
+					if (data.StageSize.y > 0 && data.StageSize.x > 0)
+					{
+						memcpy(data.FileName, FileName, sizeof(data.FileName));	//ファイル名を設定	
+						Type = Scene_Type::Game;								//Game シーンに移動
+						data.EditMode = WRITE_NEW;								//エディットモード
+					}
+					else {
+						//不正の時
+
+						mNowScene = Window_Scene::SizeSetError;	//サイズ指定エラー画面に推移
+					}
+				}
+				else if (SizeSet_menu->getChangeScene() == Window_Scene::No) {
+
+					//戻る
+					mNowScene = Window_Scene::New_File;	//新規作成画面に推移
+				}
+
+				SizeSet_menu->Reset(); //ウインドウをリセット
+			}
+
+		}break;
+
+		//サイズ指定エラー
+		case Window_Scene::SizeSetError:
+		{
+			SizeSetError_menu->Update();	//更新
+
+			//戻る
+			if (SizeSetError_menu->getChangeScene() != Window_Scene::Invalid)
 			{
-				std::vector<char*> tmp = SizeSet_menu->getInputKeyData();	//入力データーを取得
+				mNowScene = Window_Scene::SizeSet; //サイズ指定ウインドウに移行
 
-				//サイズを設定
-				data.StageSize.x = atoi(tmp.at(0));	//X
-				data.StageSize.y = atoi(tmp.at(1));	//Y
+				SizeSetError_menu->Reset();	//ウインドウをリセット
+			}
 
-				// ステージサイズが不正かどうか？
-				if (data.StageSize.y > 0 && data.StageSize.x > 0)
+		}break;
+
+
+
+		//上書き確認
+		case Window_Scene::Check:
+		{
+			CheckFile_menu->Update();	//更新
+
+			if (CheckFile_menu->getChangeScene() != Window_Scene::Invalid)
+			{
+				//決定
+				if (CheckFile_menu->getChangeScene() == Window_Scene::Yes)
 				{
 					memcpy(data.FileName, FileName, sizeof(data.FileName));	//ファイル名を設定	
 					Type = Scene_Type::Game;								//Game シーンに移動
-					data.EditMode = WRITE_NEW;								//エディットモード
+					data.EditMode = WRITE_OVERRITE;							//エディットモード
+
 				}
-				else {
-					//不正の時
-
-					mNowScene = Window_Scene::SizeSetError;	//サイズ指定エラー画面に推移
+				else if (CheckFile_menu->getChangeScene() == Window_Scene::No)
+				{
+					//戻る
+					mNowScene = Window_Scene::New_File;	//新規ファイル入力画面に戻る。
 				}
-			}
-			else if (SizeSet_menu->getChangeScene() == Window_Scene::No) {
-
-				//戻る
-				mNowScene = Window_Scene::New_File;	//新規作成画面に推移
+				CheckFile_menu->Reset();	//ウインドウをリセット
 			}
 
-			SizeSet_menu->Reset(); //ウインドウをリセット
+		}break;
 		}
-
-	}break;
-
-	//サイズ指定エラー
-	case Window_Scene::SizeSetError:
-	{
-		SizeSetError_menu->Update();	//更新
-
-		//戻る
-		if (SizeSetError_menu->getChangeScene() != Window_Scene::Invalid)
-		{
-			mNowScene = Window_Scene::SizeSet; //サイズ指定ウインドウに移行
-
-			SizeSetError_menu->Reset();	//ウインドウをリセット
-		}
-
-	}break;
-
-
-
-	//上書き確認
-	case Window_Scene::Check:
-	{
-		CheckFile_menu->Update();	//更新
-
-		if (CheckFile_menu->getChangeScene() != Window_Scene::Invalid)
-		{
-			//決定
-			if (CheckFile_menu->getChangeScene() == Window_Scene::Yes)
-			{
-				memcpy(data.FileName, FileName, sizeof(data.FileName));	//ファイル名を設定	
-				Type = Scene_Type::Game;								//Game シーンに移動
-				data.EditMode = WRITE_OVERRITE;							//エディットモード
-
-			}else if (CheckFile_menu->getChangeScene() == Window_Scene::No)
-			{
-				//戻る
-				mNowScene = Window_Scene::New_File;	//新規ファイル入力画面に戻る。
-			}
-			CheckFile_menu->Reset();	//ウインドウをリセット
-		}
-
-	}break;
-
-
-
-
-
-
 	}
-
 }
 
 //描画

@@ -19,6 +19,7 @@ Game_Scene::Game_Scene(Scene_Type t, Entry* e) : Scene_base(t, e)
 	//読み込みファイルパスを設定
 	std::string filename = "/Sprite_Data/";
 	std::string path = fs::current_path().string();
+	//path = filename;
 	path = path + filename;
 	
 	//スプライト読み込み
@@ -47,7 +48,7 @@ Game_Scene::Game_Scene(Scene_Type t, Entry* e) : Scene_base(t, e)
 			data.bin = 0x03;
 		}
 		else {
-			printf("バイナリ情報未設定: %s\n",data.name);
+			printf("バイナリ情報未設定: %s\n",data.name.c_str());
 		}
 
 		SpriteList.push_back(data);	//スプライト		
