@@ -27,9 +27,6 @@
     <ClInclude Include="Fps.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Game_Scene.hpp">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Input.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -51,7 +48,7 @@
     <ClInclude Include="MapChip.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="StartMenu.hpp">
+    <ClInclude Include="Edit_Scene.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -74,9 +71,6 @@
     <ClCompile Include="Fps.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Game_Scene.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Input.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -95,7 +89,7 @@
     <ClCompile Include="MapChip.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="StartMenu.cpp">
+    <ClCompile Include="Edit_Scene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

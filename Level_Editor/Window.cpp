@@ -137,7 +137,7 @@ void Window::AddList_Down(Window_Scene s,std::string name,byte id_number,unsigne
 
 
 
-	memset(item.InputKeyData, '\0', sizeof(item.InputKeyData));	//入力文字配列を初期化
+	//memset(item.InputKeyData, '\0', sizeof(item.InputKeyData));	//入力文字配列を初期化
 
 
 	lists.push_back(item);
@@ -158,9 +158,9 @@ byte Window::getItem()
 }
 
 //キー入力情報を返す
-std::vector<char*> Window::getInputKeyData()
+std::vector<std::string> Window::getInputKeyData()
 {
-	std::vector<char*> tmp;
+	std::vector<std::string> tmp;
 	
 	//キー入力文字列をベクター変数に入れる。
 	for (std::vector<List_Item>::iterator itr = lists.begin(); itr != lists.end(); itr++)
@@ -190,26 +190,10 @@ void Window::setSentence(const char* stc)
 //計算
 void Window::Update()
 {
-	//キー入力
-	if (lists.at(Cursor).isInput_String == true) 
-	{
-		//　文字列入力の入力の場合
-		SetActiveKeyInput(lists.at(Cursor).InputHandle);								//入力をアクティブ
-		GetKeyInputString(lists.at(Cursor).InputKeyData, lists.at(Cursor).InputHandle);	//文字列入力を受け付け
-		//printf("文字入力:　%s\n",lists.at(Cursor).InputKeyData);
-	}
-	else if(lists.at(Cursor).isInput_Number == true)
-	{
-		//　数値に入力の場合
-		SetActiveKeyInput(lists.at(Cursor).InputHandle);								//入力をアクティブ
-		GetKeyInputString(lists.at(Cursor).InputKeyData, lists.at(Cursor).InputHandle);	//数値入力を受け付け
-		//printf("数値入力:　%s\n",lists.at(Cursor).InputKeyData);
-	}else
-	{
-		SetActiveKeyInput(-1);	//入力を無効
-	}
 
-	//カーソル移動
+	//mInput->Update(); // キー入力更新
+
+//キー入力	
 	if (Owner->InputKey->getKeyDown(KEY_INPUT_UP) == true)
 	{
 		Cursor += -1;
@@ -227,14 +211,10 @@ void Window::Update()
 		}
 	}
 	else if (Owner->InputKey->getKeyDown(KEY_INPUT_RETURN) == true)
-	{	
+	{
 		Move_Scene = lists.at(Cursor).winScene;	//シーン推移
 		ID = lists.at(Cursor).ID;	//アイテムID
 	}
-
-
-
-
 }
 
 //描画

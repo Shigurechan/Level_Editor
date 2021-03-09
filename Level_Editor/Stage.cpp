@@ -1,80 +1,67 @@
 #include "Stage.hpp"
 #include "Control.hpp"
+#include <fstream>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 //コンストラクタ
-Stage::Stage(Entry* e, std::vector<SpriteData> sprite)
+Stage::Stage(Entry* e)
 {	
 	Owner = e;	//Entry クラス
-	
-	SpriteList = sprite;	//スプライトリスト
+
+	Config.StageFileName = "\0";
+	Config.StageSize = glm::ivec2(0,0);
+
+
 	mStage = std::make_shared <std::vector<std::vector<MapChip>>>();	//ステージ配列		
 }
 
-//グリッドに書き込む
-void Stage::setGrid(MapChip chip, glm::ivec2 screen_grid)
+
+void Stage::setMapChip(std::vector<SpriteData> data)
 {
+	SpriteList = data;
+}
 
-	//スクリーン座標との位置補正
-	glm::ivec2 pos = screen_grid;
-	if (screen_grid.x > SCROLL_OFFSET_RIGHT)
-	{		
-		pos.x = SCROLL_OFFSET_RIGHT;		
-	}else 	if (screen_grid.x < SCROLL_OFFSET_LEFT)
+//ステージに書き込むかどうか？
+void Stage::WriteGrid(WriteData data, bool flag)
+{
+	if (flag == true)
 	{
-		pos.x = SCROLL_OFFSET_LEFT;
-	}
-	else if (screen_grid.y > SCROLL_OFFSET_DOWN)
-	{
-		pos.y = SCROLL_OFFSET_DOWN;
-	}
-	else if (screen_grid.y < SCROLL_OFFSET_UP)
-	{
-		pos.y = SCROLL_OFFSET_UP;
-	}
+		mStage->at(data.GridPos.y).at(data.GridPos.x).setBinary(data.bin);
+		mStage->at(data.GridPos.y).at(data.GridPos.x).setSprite(data.sprite);
 
-	try {
-		mStage->at(chip.getPosition().y).at(chip.getPosition().x).setBinary(chip.getBinary());				//バイナリを設定
-		mStage->at(chip.getPosition().y).at(chip.getPosition().x).setSprite(chip.getSprite());				//スプライトを設定	
-		mStage->at(chip.getPosition().y).at(chip.getPosition().x).setPosition(pos * CELL);	//座標を設定
-		
-	}
-	catch (std::exception e)
-	{
-		printf("setGrid():  %s\n",e.what());	//例外処理
 	}
 }
 
 
-//ファイルを新規作成
-void Stage::NewFile(EditData data)
+//読み込みバイナリファイル名
+void Stage::setStage(ConfigData config)
 {
-	FILE* fp = NULL;	//ファイルポインタ
-	fopen_s(&fp, data.FileName, "wb"); //書き込み専用モード
-	fclose(fp);	//ファイルを閉じる
-
-	mSize = data.StageSize;	//ステージサイズを設定
-
-	//ステージを初期化
-	std::vector<std::vector<MapChip>> stage(data.StageSize.y,std::vector<MapChip>(data.StageSize.x));
-	for (int y = 0; y < mSize.y; y++)
+	if (Config.StageFileName != config.StageFileName)
 	{
-		for (int x = 0; x < mSize.x; x++)
-		{
-			stage.at(y).at(x).setPosition(glm::ivec2(x * CELL,y * CELL));
-		}
+//		printf("あああ\n");
+		mStage->clear();
+		Config.StageFileName = config.StageFileName;
+		ReadFile(Config.StageFileName);
 	}
-	*mStage = stage;
 
-
-
-	WriteFile(data);	//バイナリファイルに書き込む
 }
+
+//バイナリファイルに書き込む
+void Stage::setSaveFile(bool isSave)
+{
+	if (isSave == true)
+	{
+		WriteFile(Config.StageFileName);
+	}
+}
+
 
 //バイナリファイルにステージを書き込む
-void Stage::WriteFile(EditData data)
+void Stage::WriteFile(std::string file)
 {
 	FILE* fp = NULL;	//ファイルポインタ
-	fopen_s(&fp, data.FileName, "wb");	//書き込み専用でバイナリファイルを開く
+	fopen_s(&fp, file.c_str(), "wb");	//書き込み専用でバイナリファイルを開く
 	
 	//先頭８バイトはステージのサイズ
 	fwrite(&mSize.x, sizeof(int), 1, fp);	//Xサイズ
@@ -93,17 +80,21 @@ void Stage::WriteFile(EditData data)
 	fclose(fp);		//ファイルクローズ
 }
 
+
 //バイナリファイルをステージに読み込む
-void Stage::ReadFile(EditData data)
+void Stage::ReadFile(std::string file)
 {
-	printf("ファイル読み込み\n");
+	//printf("ファイル読み込み: %s\n", data.FileName.c_str());
 
 	FILE* fp = NULL;
 	
-		printf("FileName: %s\n", data.FileName);
-		fopen_s(&fp, data.FileName, "rb");	//読み込みモードでバイナリファイルを開く
+		//printf("FileName: %s\n", data.FileName.c_str());
+		fopen_s(&fp, file.c_str(), "rb");	//読み込みモードでバイナリファイルを開く
 		if (fp != NULL)
 		{
+
+		//	printf("ファイル読み込み aaa   \n");
+
 			//先頭８バイトはステージのサイズ
 			fread(&mSize.x, sizeof(int), 1, fp);
 			fread(&mSize.y, sizeof(int), 1, fp);
@@ -134,18 +125,35 @@ void Stage::ReadFile(EditData data)
 				}
 				mStage->push_back(map);	//ステージに書き込む
 			}
+
+			fclose(fp);	//ファイルを閉じる。
 		}
-	fclose(fp);	//ファイルを閉じる。
+		else {
+			printf("ファイルを読めません。");
+		}
 }
+
+
 
 //スクロール
 void Stage::Scroll(std::shared_ptr<Control> control)
 {
-	if (control->getScreenGridPos().x > SCROLL_OFFSET_RIGHT && control->getVector() == VECTOR_RIGHT)
+
+#define OFFSET_RIGHT 21 
+#define OFFSET_LEFT 4
+
+#define OFFSET_DOWN 15 
+#define OFFSET_UP 4
+
+
+
+	//Right
+	if ((control->getVector() == VECTOR_RIGHT) && ( control->getScreenGridPos().x > OFFSET_RIGHT))
 	{
-		//座標を前の座標に戻す。
+		//printf("Right\n");
+
 		glm::ivec2 pos = control->getScreenGridPos();
-		pos.x += -1;
+		pos.x -= 1;
 		control->setScreenGridPos(pos);
 
 		for (int y = 0; y < mStage->size(); y++)
@@ -153,16 +161,21 @@ void Stage::Scroll(std::shared_ptr<Control> control)
 			for (int x = 0; x < mStage->at(y).size(); x++)
 			{
 				glm::ivec2 p = mStage->at(y).at(x).getPosition();
-				p.x += -CELL;
-				mStage->at(y).at(x).setPosition(p);		
+				p.x -= CELL;
+				mStage->at(y).at(x).setPosition(p);
 			}
 		}
-	}else if (control->getScreenGridPos().x < SCROLL_OFFSET_LEFT && control->getVector() == VECTOR_LEFT)
+	}
+
+	//Left
+	if ((control->getVector() == VECTOR_LEFT) && (control->getScreenGridPos().x < OFFSET_LEFT))
 	{
-		//座標を前の座標に戻す。
+		//printf("Left\n");
+
 		glm::ivec2 pos = control->getScreenGridPos();
 		pos.x += 1;
 		control->setScreenGridPos(pos);
+
 
 		for (int y = 0; y < mStage->size(); y++)
 		{
@@ -173,11 +186,17 @@ void Stage::Scroll(std::shared_ptr<Control> control)
 				mStage->at(y).at(x).setPosition(p);
 			}
 		}
-	}else if (control->getScreenGridPos().y > SCROLL_OFFSET_DOWN && control->getVector() == VECTOR_DOWN)
+	}
+
+
+
+	//Down
+	if ((control->getVector() == VECTOR_DOWN) && (control->getScreenGridPos().y > OFFSET_DOWN))
 	{
-		//座標を前の座標に戻す。
+		//printf("Left\n");
+
 		glm::ivec2 pos = control->getScreenGridPos();
-		pos.y += -1;
+		pos.y -= 1;
 		control->setScreenGridPos(pos);
 
 		for (int y = 0; y < mStage->size(); y++)
@@ -185,14 +204,17 @@ void Stage::Scroll(std::shared_ptr<Control> control)
 			for (int x = 0; x < mStage->at(y).size(); x++)
 			{
 				glm::ivec2 p = mStage->at(y).at(x).getPosition();
-				p.y += -CELL;
+				p.y -= CELL;
 				mStage->at(y).at(x).setPosition(p);
 			}
 		}
 	}
-	else if (control->getScreenGridPos().y < SCROLL_OFFSET_UP && control->getVector() == VECTOR_UP)
+
+	//UP
+	if ((control->getVector() == VECTOR_UP) && (control->getScreenGridPos().y < OFFSET_UP))
 	{
-		//座標を前の座標に戻す。
+		//printf("Left\n");
+
 		glm::ivec2 pos = control->getScreenGridPos();
 		pos.y += 1;
 		control->setScreenGridPos(pos);
@@ -207,12 +229,25 @@ void Stage::Scroll(std::shared_ptr<Control> control)
 			}
 		}
 	}
+
+
+
+
+#undef OFFSET_RIGHT 21 
+#undef OFFSET_LEFT 4
+
+#undef OFFSET_DOWN 15 
+#undef OFFSET_UP 4
+
+
+
 }
 
 
 //更新
 void Stage::Update()
 {
+	
 	for (int y = 0; y < mStage->size(); y++)
 	{
 		for (int x = 0; x < mStage->at(y).size(); x++)
@@ -229,40 +264,43 @@ void Stage::Draw()
 //	DrawFormatString(0,0,GetColor(0,0,0),"Size X : %d",mStage->size());
 
 
-
-	//グリッド描画
-	for (int y = 0; y < SCREEN_HEIGHT; y++)
+	if (mStage->size() > 0) 
 	{
-		if (y * CELL == SCREEN_HEIGHT) {
-			DrawLine(0, (y * CELL) - 1, STAGE_WIDTH, (y * CELL) - 1, GetColor(0, 255, 0));
-		}
-		else {
-			DrawLine(0, y * CELL, STAGE_WIDTH, y * CELL, GetColor(0, 255, 0));
 
-		}
-	}
-
-	for (int x = 0; x < SCREEN_WIDTH; x++)
-	{
-		if (x * CELL == SCREEN_WIDTH)
+		//グリッド描画
+		for (int y = 0; y < SCREEN_HEIGHT; y++)
 		{
-			DrawLine((x * CELL) - 1, 0, (x * CELL) - 1, STAGE_HEIGHT, GetColor(0, 255, 0));
+			if (y * CELL == SCREEN_HEIGHT) {
+				DrawLine(0, (y * CELL) - 1, STAGE_WIDTH, (y * CELL) - 1, GetColor(0, 255, 0));
+			}
+			else {
+				DrawLine(0, y * CELL, STAGE_WIDTH, y * CELL, GetColor(0, 255, 0));
 
+			}
 		}
-		else {
-			DrawLine(x * CELL, 0, x * CELL, STAGE_HEIGHT, GetColor(0, 255, 0));
-		}
-	}
 
-	//セル描画
-	for (int y = 0; y < mSize.y; y++)
-	{
-		for (int x = 0; x < mSize.x; x++)
+		for (int x = 0; x < SCREEN_WIDTH; x++)
 		{
-			mStage->at(y).at(x).Draw();
-		}
-	}
+			if (x * CELL == SCREEN_WIDTH)
+			{
+				DrawLine((x * CELL) - 1, 0, (x * CELL) - 1, STAGE_HEIGHT, GetColor(0, 255, 0));
 
+			}
+			else {
+				DrawLine(x * CELL, 0, x * CELL, STAGE_HEIGHT, GetColor(0, 255, 0));
+			}
+		}
+
+		//セル描画
+		for (int y = 0; y < mSize.y; y++)
+		{
+			for (int x = 0; x < mSize.x; x++)
+			{
+				mStage->at(y).at(x).Draw();
+			}
+		}
+
+	}
 
 }
 

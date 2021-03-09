@@ -1,6 +1,5 @@
 #include "Entry.hpp"
-#include "Game_Scene.hpp"
-#include "StartMenu.hpp"
+#include "Edit_Scene.hpp"
 
 //コンストラクタ
 Entry::Entry()
@@ -10,10 +9,10 @@ Entry::Entry()
 
 	InputKey = std::make_shared<Input>();	//キー入力
 
-	game = std::make_shared<Game_Scene>(Scene_Type::Game, this);
-	start = std::make_shared<StartMenu>(Scene_Type::Title, this);
+	
+	Edit = std::make_shared<Edit_Scene>(Scene_Type::Edit, this);
 
-	Scene = Scene_Type::Title;	//最初のシーン
+	Scene = Scene_Type::SetUp;	//最初のシーン
 }
 
 //スプライトをロード
@@ -32,8 +31,8 @@ int Entry::LoadSprite(const char* FileName)
 }
 
 
-
-std::string Entry::GetDrugPath()
+//D&Dパスを取得
+std::string Entry::GetDragPath()
 {
 	//	printf("Command %s\n\n", GetCommandLine());
 	std::string cmd(GetCommandLine());
@@ -41,12 +40,9 @@ std::string Entry::GetDrugPath()
 	int f = cmd.find(' ');	//取り出す位置
 	cmd = cmd.substr((f + 1), all - f);
 
-	printf("%s ",cmd.c_str());
+	//printf("%s ",cmd.c_str());
 	return cmd;
 }
-
-
-
 
 //計算
 void Entry::Update()
@@ -56,20 +52,21 @@ void Entry::Update()
 	switch (Scene)	
 	{
 
-		//タイトル
-	case Scene_Type::Title:
+		//初期化
+	case Scene_Type::SetUp:
 	{
-		start->Update();				//更新
-		Scene = start->getSceneType();	//シーン推移
-		mData = start->getEditData();	//エディットデータを取得
+
+		Edit->SetUp();	//初期化
+
+		Scene = Scene_Type::Edit;
 	}break;
 
-		//メインゲーム
-	case Scene_Type::Game:
+		//エディット
+	case Scene_Type::Edit:
 	{
-		game->Update();					//更新
-		game->setEditData(mData);		//エディットデータを設定
-		Scene = game->getSceneType();	//シーン推移
+
+		Edit->Update();					//更新
+		Scene = Edit->getSceneType();	//シーン推移
 	}break;
 
 
@@ -83,20 +80,12 @@ void Entry::Draw()
 {
 	switch (Scene)
 	{
-
-	//タイトル
-	case Scene_Type::Title:
+	
+	//
+	case Scene_Type::Edit:
 	{
-		start->Draw();
-		Scene = start->getSceneType();
-	}break;
-
-
-	//メインゲーム
-	case Scene_Type::Game:
-	{
-		game->Draw();
-		Scene = game->getSceneType();
+		Edit->Draw();
+		Scene = Edit->getSceneType();
 	}break;
 
 

@@ -37,6 +37,10 @@ enum class Window_Scene
 	Yes,
 	No,
 
+	StageSelect,
+	ChipSelect,
+	ChangeSize,
+
 
 	SizeSetOverWrite,
 
@@ -79,7 +83,8 @@ typedef struct List_Item
 	bool isInput_Number;	//数値入力かどうか？
 	int InputHandle;		//キー入力ハンドル
 
-	char InputKeyData[INPUT_KEY_NUMBER_MAX];	//入力データ
+	//char InputKeyData[INPUT_KEY_NUMBER_MAX];	//入力データ
+	std::string InputKeyData;	//入力データ
 
 }List_Item;
 
@@ -114,7 +119,7 @@ public:
 
 	// ################## 取得　関係
 	Window_Scene getChangeScene();				//シーン推移を取得
-	std::vector<char*> getInputKeyData();	//キー入力情報			
+	std::vector<std::string> getInputKeyData();	//キー入力情報			
 	byte getItem();	//識別子IDを取得
 
 
@@ -135,7 +140,7 @@ private:
 	char size_x[INPUT_KEY_NUMBER_MAX];
 	char size_y[INPUT_KEY_NUMBER_MAX];
 
-
+	char str[INPUT_KEY_NUMBER_MAX];
 
 	unsigned int BackGroundColor;		//ウインドウ背景色
 	unsigned int CursorSelectColor;		//カーソルの選択時の背景色

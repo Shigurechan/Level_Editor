@@ -22,18 +22,24 @@ class Control;	//操作
 class Stage
 {
 public:
-	Stage(Entry *e, std::vector<SpriteData> sprite);	//コンストラクタ
+	Stage(Entry *e);	//コンストラクタ
 	~Stage();	//デストラクタ
 
 	void Update();		//計算
 	void Draw();		//描画
 
-	void setGrid(MapChip chip, glm::ivec2 screen_grid);		//グリッドに書き込む
-	void WriteFile(EditData data);	//バイナリファイルにステージを書き込む
-	void ReadFile(EditData data);	//バイナリファイルを読み込む
-	void NewFile(EditData data);	//新規ファイルを作成
+	void setGrid(MapChip chip, glm::ivec2 screen_grid);	//グリッドに書き込む
+	void setMapChip(std::vector<SpriteData> data);		//マップチップデータを取得
+	void WriteFile(std::string file);					//バイナリファイルにステージを書き込む
+	void ReadFile(std::string file);					//バイナリファイルを読み込む
+	void setSaveFile(bool isSave);
+	void Scroll(std::shared_ptr<Control> control);		//スクロールする向き
+	void setStage(ConfigData config);					//コンフィグデータを取得
+	void SetUp();										//フォルダからステージを読み込む
+	void WriteGrid(WriteData data,bool flag);			//ステージに書き込むかどうか？
 
-	void Scroll(std::shared_ptr<Control> control);	//スクロールする向き
+
+
 private:
 
 	glm::ivec2 mSize;	//サイズ
@@ -41,6 +47,12 @@ private:
 	std::vector<SpriteData> SpriteList;	//スプライトリスト
 	Entry* Owner;
 	
+	std::vector<std::string> FileNameList;	//ファイルリスト
+	ConfigData Config;	//コンフィグ
+
+
+
+
 };
 
 

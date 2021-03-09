@@ -14,18 +14,19 @@ enum class Scene_Type;
 * 説明
 * メインのゲーム画面
 ######################################################*/
-class Game_Scene : public Scene_base
+class Edit_Scene : public Scene_base
 {
 public:
-	Game_Scene(Scene_Type t,Entry* e);	//コンストラクタ
-	~Game_Scene();						//デストラクタ
+	Edit_Scene(Scene_Type t,Entry* e);	//コンストラクタ
+	~Edit_Scene();						//デストラクタ
 	void SetUp();	//セットアップ初期設定
 
 
 	void Update();	//更新
 	void Draw();	//描画
 
-	void setEditData(EditData data);	//エディットデータを取得
+	
+	
 private:
 
 
@@ -33,9 +34,11 @@ private:
 	std::shared_ptr<Stage> stage;		//マップ描画クラス
 	std::shared_ptr<Control> control;	//操作クラス
 
-	EditData Data;	//エディットデータを取得
+	
 	Entry* Owner;	//Entry クラス
 
+	WriteData Data;
+	std::string DDPath;	//D&Dパス
 	bool isEditScene = false;//エディットシーンに推移
 };
 

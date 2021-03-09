@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-class Game_Scene;
+class Edit_Scene;
 class StartMenu;
 
 #define CELL ((int)48)	//セル
@@ -14,16 +14,9 @@ class StartMenu;
 typedef unsigned char byte;	//バイト
 
 
-#define INPUT_KEY_NUMBER_MAX 500	//入力可能最大文字数
+#define INPUT_KEY_NUMBER_MAX 255	//入力可能最大文字数
 
 
-
-#define SCROLL_OFFSET_RIGHT 18
-#define SCROLL_OFFSET_LEFT 6
-
-
-#define SCROLL_OFFSET_UP 4
-#define SCROLL_OFFSET_DOWN 15
 
 
 //画面サイズ
@@ -61,27 +54,48 @@ typedef struct SpriteData
 }SpriteData;
 
 
-//エディット情報
-typedef struct EditData
+//エディット情報　ステージに送る
+typedef struct WriteData
 {
-	byte EditMode;			//エディットモード
-	char FileName[INPUT_KEY_NUMBER_MAX];		//書き込むファイル名
-	glm::ivec2 StageSize;	//ステージのサイズ
+	int sprite;				//スプライト
+	byte bin;				//バイナリ
+	glm::ivec2 GridPos;		//グリッド座標
+
+}WriteData;
 
 
-}EditData;
+//オプションを送信する。
+typedef struct ConfigData
+{
+	glm::ivec2 StageSize;
+	std::string StageFileName;
+
+}ConfigData;
 
 
 // シーンの種類
 enum class Scene_Type
 {
 	Title,		//タイトル
-	Game,		//メインゲーム
+	SetUp,
+	Edit,		//エディット画面
 	GameOver,	//ゲームオーバー
 
 
 	Menu,		//メニュー
 	Pause,		//一時停止
+};
+
+
+// マップオブジェクト
+enum class MapObject
+{
+
+	None =	0x00,	//なし
+	Block = 0x01,	//ブロック
+	Brick = 0x02,	//レンガ
+	Shop =	0x03,	//ショップ
+	Enemy = 0x04,	//エネミー
 };
 
 
@@ -107,11 +121,11 @@ public:
 
 
 	std::shared_ptr<Input> InputKey;	//キー入力
-	std::string GetDrugPath();			//D&Dパス
+	std::string GetDragPath();			//D&Dパス
 
 private:
 
-	std::shared_ptr<Game_Scene> game;	//エディット画面
+	std::shared_ptr<Edit_Scene> Edit;	//エディット画面
 
 	std::shared_ptr<StartMenu> start;	//ファイル選択画面
 
@@ -119,7 +133,7 @@ private:
 	Scene_Type Prev_Scene;	//前のシーン
 
 	bool changeScene = false; //シーン切り替え
-	EditData mData;
+	
 };
 
 
