@@ -33,7 +33,7 @@ Control::Control(Entry* e)
 	Screen_GridPos = GridPos;	//スクリーン座標
 
 	// ################ マップチップをロード　################ 
-	std::string filename = "\\Sprite_Data";	//バイナリファイルの格納ディレクトリ
+	std::string filename = "\\Assets\\Sprite";	//バイナリファイルの格納ディレクトリ
 	std::string path = fs::current_path().string();
 	path = path + filename;
 	

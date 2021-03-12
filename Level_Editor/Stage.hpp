@@ -17,6 +17,15 @@
 * 
 ######################################################*/
 
+//フレームを描画
+typedef struct StageFrame
+{
+	glm::ivec2 start;	//始点
+	glm::ivec2 end;		//終点
+	int range;			//長さ
+}StageFrame;
+
+
 class Control;	//操作
 
 class Stage
@@ -41,6 +50,13 @@ public:
 
 
 private:
+
+	//ステージの境界線フレーム
+	StageFrame frame_up;
+	StageFrame frame_down;
+	StageFrame frame_left;
+	StageFrame frame_right;
+
 
 	glm::ivec2 mSize;	//サイズ
 	std::shared_ptr<std::vector<std::vector<MapChip>>> mStage;	//ステージ

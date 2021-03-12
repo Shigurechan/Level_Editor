@@ -33,15 +33,15 @@ void Edit_Scene::Update()
 
 
 
-	stage->Update();	//更新
-	control->Update();	//更新
-
 	stage->setStage(control->getConfig());								//設定ファイルを書き込む
 	stage->WriteGrid(control->getWriteData(),control->isWrite_cell);	//ステージに書き込む
 	stage->setSaveFile(control->isSave);								//ファイルをセーブ
+
+
+	control->Update();	//更新
+	stage->Update();	//更新
+
 	stage->Scroll(control);												//画面スクロール
-
-
 
 }
 

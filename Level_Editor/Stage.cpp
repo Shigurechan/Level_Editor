@@ -27,9 +27,12 @@ void Stage::WriteGrid(WriteData data, bool flag)
 {
 	if (flag == true)
 	{
-		mStage->at(data.GridPos.y).at(data.GridPos.x).setBinary(data.bin);
-		mStage->at(data.GridPos.y).at(data.GridPos.x).setSprite(data.sprite);
-
+		if ( (data.GridPos.x >= 0 && data.GridPos.x < mSize.x) && (data.GridPos.y >= 0 && data.GridPos.y < mSize.y) )
+		{
+			printf("あああ\n");
+			mStage->at(data.GridPos.y).at(data.GridPos.x).setBinary(data.bin);
+			mStage->at(data.GridPos.y).at(data.GridPos.x).setSprite(data.sprite);
+		}
 	}
 }
 
@@ -84,7 +87,8 @@ void Stage::WriteFile(std::string file)
 //バイナリファイルをステージに読み込む
 void Stage::ReadFile(std::string file)
 {
-	//printf("ファイル読み込み: %s\n", data.FileName.c_str());
+
+	printf("ファイル読み込み \n");
 
 	FILE* fp = NULL;
 	
@@ -98,6 +102,26 @@ void Stage::ReadFile(std::string file)
 			//先頭８バイトはステージのサイズ
 			fread(&mSize.x, sizeof(int), 1, fp);
 			fread(&mSize.y, sizeof(int), 1, fp);
+
+			printf("mSize.x: %d\n", mSize.x);
+			printf("mSize.y: %d\n", mSize.y);
+
+
+			//ステージの境界線フレームを設定
+			
+			frame_up.start = glm::ivec2(-CELL,-CELL);
+			frame_up.end = glm::ivec2(mSize.x * CELL, 0);
+				
+			frame_left.start = glm::ivec2(-CELL, -CELL);
+			frame_left.end = glm::ivec2(0, mSize.y * CELL);
+			
+			frame_right.start = glm::ivec2(mSize.x * CELL, -CELL);
+			frame_right.end = glm::ivec2((mSize.x * CELL) + CELL, mSize.y * CELL);
+
+			frame_down.start = glm::ivec2(0, mSize.y * CELL);
+			frame_down.end = glm::ivec2(mSize.x * CELL, (mSize.y * CELL) + CELL);
+
+
 
 			std::vector<MapChip> map;
 			for (int y = 0; y < mSize.y; y++)
@@ -145,25 +169,54 @@ void Stage::Scroll(std::shared_ptr<Control> control)
 #define OFFSET_DOWN 15 
 #define OFFSET_UP 4
 
-
-
 	//Right
 	if ((control->getVector() == VECTOR_RIGHT) && ( control->getScreenGridPos().x > OFFSET_RIGHT))
 	{
 		//printf("Right\n");
 
-		glm::ivec2 pos = control->getScreenGridPos();
-		pos.x -= 1;
-		control->setScreenGridPos(pos);
-
-		for (int y = 0; y < mStage->size(); y++)
+		//グリット範囲内の場合
+		if ((control->getGridPos().x >= 0 && control->getGridPos().x < mSize.x) && (control->getGridPos().y >= 0 && control->getGridPos().y < mSize.y))
 		{
-			for (int x = 0; x < mStage->at(y).size(); x++)
+
+			glm::ivec2 pos = control->getScreenGridPos();
+			pos.x += -1;
+			control->setScreenGridPos(pos);
+
+			for (int y = 0; y < mStage->size(); y++)
 			{
-				glm::ivec2 p = mStage->at(y).at(x).getPosition();
-				p.x -= CELL;
-				mStage->at(y).at(x).setPosition(p);
+				for (int x = 0; x < mStage->at(y).size(); x++)
+				{
+					glm::ivec2 p = mStage->at(y).at(x).getPosition();
+					p.x += -CELL;
+					mStage->at(y).at(x).setPosition(p);
+				}
 			}
+
+
+
+			//境界線フレーム移動
+			frame_right.start.x += -CELL;
+			frame_right.end.x += -CELL;
+
+
+			frame_left.start.x += -CELL;
+			frame_left.end.x += -CELL;
+		}
+		else {
+			if (control->getGridPos().x > mSize.x - 1)
+			{
+				//グリッド補正
+				glm::ivec2 p = control->getGridPos();
+				p.x = mSize.x - 1;
+				control->setGridPos(p);
+
+				//スクリーングリッド補正
+				glm::ivec2 pos = control->getScreenGridPos();
+				pos.x += -1;
+				control->setScreenGridPos(pos);
+			}
+
+
 		}
 	}
 
@@ -171,20 +224,48 @@ void Stage::Scroll(std::shared_ptr<Control> control)
 	if ((control->getVector() == VECTOR_LEFT) && (control->getScreenGridPos().x < OFFSET_LEFT))
 	{
 		//printf("Left\n");
-
-		glm::ivec2 pos = control->getScreenGridPos();
-		pos.x += 1;
-		control->setScreenGridPos(pos);
-
-
-		for (int y = 0; y < mStage->size(); y++)
+		if ((control->getGridPos().x >= 0 && control->getGridPos().x < mSize.x) && (control->getGridPos().y >= 0 && control->getGridPos().y < mSize.y))
 		{
-			for (int x = 0; x < mStage->at(y).size(); x++)
+
+
+
+			glm::ivec2 pos = control->getScreenGridPos();
+			pos.x += 1;
+			control->setScreenGridPos(pos);
+
+
+			for (int y = 0; y < mStage->size(); y++)
 			{
-				glm::ivec2 p = mStage->at(y).at(x).getPosition();
-				p.x += CELL;
-				mStage->at(y).at(x).setPosition(p);
+				for (int x = 0; x < mStage->at(y).size(); x++)
+				{
+					glm::ivec2 p = mStage->at(y).at(x).getPosition();
+					p.x += CELL;
+					mStage->at(y).at(x).setPosition(p);
+				}
 			}
+
+			//境界線フレーム移動
+			frame_left.start.x += CELL;
+			frame_left.end.x += CELL;
+
+			frame_right.start.x += CELL;
+			frame_right.end.x += CELL;
+		}
+		else 
+		{
+			if (control->getGridPos().x < 0) 
+			{
+				//グリッド補正
+				glm::ivec2 p = control->getGridPos();
+				p.x = 0;
+				control->setGridPos(p);
+
+				//スクリーングリッド補正
+				glm::ivec2 pos = control->getScreenGridPos();
+				pos.x += 1;
+				control->setScreenGridPos(pos);
+			}
+
 		}
 	}
 
@@ -194,19 +275,47 @@ void Stage::Scroll(std::shared_ptr<Control> control)
 	if ((control->getVector() == VECTOR_DOWN) && (control->getScreenGridPos().y > OFFSET_DOWN))
 	{
 		//printf("Left\n");
-
-		glm::ivec2 pos = control->getScreenGridPos();
-		pos.y -= 1;
-		control->setScreenGridPos(pos);
-
-		for (int y = 0; y < mStage->size(); y++)
+		if ((control->getGridPos().x >= 0 && control->getGridPos().x < mSize.x) && (control->getGridPos().y >= 0 && control->getGridPos().y < mSize.y))
 		{
-			for (int x = 0; x < mStage->at(y).size(); x++)
+
+			glm::ivec2 pos = control->getScreenGridPos();
+			pos.y -= 1;
+			control->setScreenGridPos(pos);
+
+			for (int y = 0; y < mStage->size(); y++)
 			{
-				glm::ivec2 p = mStage->at(y).at(x).getPosition();
-				p.y -= CELL;
-				mStage->at(y).at(x).setPosition(p);
+				for (int x = 0; x < mStage->at(y).size(); x++)
+				{
+					glm::ivec2 p = mStage->at(y).at(x).getPosition();
+					p.y -= CELL;
+					mStage->at(y).at(x).setPosition(p);
+				}
 			}
+
+
+			//境界線フレーム移動
+			frame_up.start.y += -CELL;
+			frame_up.end.y += -CELL;
+
+			frame_down.start.y += -CELL;
+			frame_down.end.y += -CELL;
+
+		}
+		else 
+		{
+			if (control->getGridPos().y > mSize.y - 1)
+			{
+				//グリッド補正
+				glm::ivec2 p = control->getGridPos();
+				p.y = mSize.y - 1;
+				control->setGridPos(p);
+
+				//スクリーングリッド補正
+				glm::ivec2 pos = control->getScreenGridPos();
+				pos.y += -1;
+				control->setScreenGridPos(pos);
+			}
+
 		}
 	}
 
@@ -214,32 +323,52 @@ void Stage::Scroll(std::shared_ptr<Control> control)
 	if ((control->getVector() == VECTOR_UP) && (control->getScreenGridPos().y < OFFSET_UP))
 	{
 		//printf("Left\n");
-
-		glm::ivec2 pos = control->getScreenGridPos();
-		pos.y += 1;
-		control->setScreenGridPos(pos);
-
-		for (int y = 0; y < mStage->size(); y++)
+		if ((control->getGridPos().x >= 0 && control->getGridPos().x < mSize.x) && (control->getGridPos().y >= 0 && control->getGridPos().y < mSize.y))
 		{
-			for (int x = 0; x < mStage->at(y).size(); x++)
+		
+			glm::ivec2 pos = control->getScreenGridPos();
+			pos.y += 1;
+			control->setScreenGridPos(pos);
+
+			for (int y = 0; y < mStage->size(); y++)
 			{
-				glm::ivec2 p = mStage->at(y).at(x).getPosition();
-				p.y += CELL;
-				mStage->at(y).at(x).setPosition(p);
+				for (int x = 0; x < mStage->at(y).size(); x++)
+				{
+					glm::ivec2 p = mStage->at(y).at(x).getPosition();
+					p.y += CELL;
+					mStage->at(y).at(x).setPosition(p);
+				}
+			}
+
+
+			//境界線フレーム移動
+			frame_up.start.y += CELL;
+			frame_up.end.y += CELL;
+
+			frame_down.start.y += CELL;
+			frame_down.end.y += CELL;
+		}
+		else 
+		{
+			if (control->getGridPos().y < 0) 
+			{
+				//グリット補正
+				glm::ivec2 p = control->getGridPos();
+				p.y = 0;
+				control->setGridPos(p);
+
+				//スクリーングリッド補正
+				glm::ivec2 pos = control->getScreenGridPos();
+				pos.y += 1;
+				control->setScreenGridPos(pos);
 			}
 		}
 	}
 
-
-
-
-#undef OFFSET_RIGHT 21 
-#undef OFFSET_LEFT 4
-
-#undef OFFSET_DOWN 15 
-#undef OFFSET_UP 4
-
-
+#undef OFFSET_RIGHT
+#undef OFFSET_LEFT
+#undef OFFSET_DOWN
+#undef OFFSET_UP
 
 }
 
@@ -264,8 +393,19 @@ void Stage::Draw()
 //	DrawFormatString(0,0,GetColor(0,0,0),"Size X : %d",mStage->size());
 
 
+
+
 	if (mStage->size() > 0) 
 	{
+
+		DrawBox(frame_up.start.x, frame_up.start.y, frame_up.end.x, frame_up.end.y, GetColor(0, 255, 0), true);
+		DrawBox(frame_left.start.x, frame_left.start.y, frame_left.end.x, frame_left.end.y, GetColor(0, 255, 0), true);
+		DrawBox(frame_right.start.x, frame_right.start.y, frame_right.end.x, frame_right.end.y, GetColor(0, 255, 0), true);
+		DrawBox(frame_down.start.x, frame_down.start.y, frame_down.end.x, frame_down.end.y, GetColor(0, 255, 0), true);
+
+
+//		DrawBox(0,0, CELL,CELL, GetColor(0, 255, 0), true);
+
 
 		//グリッド描画
 		for (int y = 0; y < SCREEN_HEIGHT; y++)
@@ -299,6 +439,10 @@ void Stage::Draw()
 				mStage->at(y).at(x).Draw();
 			}
 		}
+
+
+
+		
 
 	}
 
