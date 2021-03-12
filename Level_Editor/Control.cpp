@@ -369,11 +369,12 @@ void Control::Update()
 			isWrite_cell = false;	//ステージ書き込まない
 		}
 
+
 		//ステージの書き込みを消す
 		if (Owner->InputKey->getKeyDown(KEY_INPUT_DELETE) == true)
 		{
 			
-			isWrite_cell = true;	//ステージに書き込む
+			//isWrite_cell = true;	//ステージに書き込む
 		}
 
 	}

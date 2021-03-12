@@ -2,6 +2,7 @@
 #include "Control.hpp"
 #include <fstream>
 #include <filesystem>
+
 namespace fs = std::filesystem;
 
 //コンストラクタ
