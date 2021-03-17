@@ -13,8 +13,8 @@ Control::Control(Entry* e)
 
 	Owner = e;				//Entry クラス
 
-	printf("X %d\n", SCREEN_WIDTH / CELL);
-	printf("Y %d\n",SCREEN_HEIGHT / CELL);
+//	printf("X %d\n", SCREEN_WIDTH / CELL);
+//	printf("Y %d\n",SCREEN_HEIGHT / CELL);
 
 
 	
@@ -448,7 +448,8 @@ void Control::Draw()
 	//セーブ表示
 	if (isSave == true)
 	{
-		DrawFormatString(0,0, GetColor(255, 255, 255), "SAVED"); 
+		DrawFormatString(0,0, GetColor(255, 255, 255), "SAVED");
+
 	}
 
 
