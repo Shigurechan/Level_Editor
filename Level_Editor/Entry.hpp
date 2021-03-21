@@ -57,20 +57,35 @@ typedef struct SpriteData
 //エディット情報　ステージに送る
 typedef struct WriteData
 {
-	int sprite;				//スプライト
-	byte bin;				//バイナリ
-	glm::ivec2 GridPos;		//グリッド座標
-
+	
 }WriteData;
 
 
 //オプションを送信する。
-typedef struct ConfigData
+typedef struct EditData
 {
-	glm::ivec2 StageSize;
-	std::string StageFileName;
+public: 
+	bool isStageResize;		//ステージサイズをリサイズ
+	glm::ivec2 stageSize;	//ステージサイズ
 
-}ConfigData;
+
+	bool isFileSelect;			//ファイル切り替え
+	std::string stageFileName;	//ファイル名
+
+
+	bool isWriteCell;		//書き込み
+	int sprite;				//スプライト
+	byte bin;				//バイナリ
+	glm::ivec2 gridPos;		//グリッド座標
+
+
+	
+	bool isSave;			//保存
+	bool isDelete;			//削除
+	bool isNewFile;			//新規作成
+
+
+}EditData;
 
 
 // シーンの種類

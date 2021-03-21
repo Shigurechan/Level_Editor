@@ -10,13 +10,27 @@ Stage::Stage(Entry* e)
 {	
 	Owner = e;	//Entry クラス
 
-	Config.StageFileName = "\0";
-	Config.StageSize = glm::ivec2(0,0);
+
+	mStage = std::make_shared<std::vector<std::vector<MapChip>>>();	//ステージ配列		
+
+	mSize = glm::ivec2(100, 100);
+
+	for (int y = 0; y < mSize.y; y++)
+	{
+		std::vector<MapChip> tmp;
+		for (int x = 0; x < mSize.x; x++)
+		{
+			tmp.push_back(MapChip());
+			tmp.back().setPosition(glm::ivec2(x * CELL, y * CELL));	//座標を設定
+
+		}
 
 
-	mStage = std::make_shared <std::vector<std::vector<MapChip>>>();	//ステージ配列		
+		mStage->push_back(tmp);
+
+	}
+
 }
-
 
 void Stage::setMapChip(std::vector<SpriteData> data)
 {
@@ -24,41 +38,76 @@ void Stage::setMapChip(std::vector<SpriteData> data)
 }
 
 //ステージに書き込むかどうか？
-void Stage::WriteGrid(WriteData data, bool flag)
+void Stage::WriteGrid(int sprite,byte bin,glm::ivec2 gridPos)
 {
-	if (flag == true)
+	
+	if ( (gridPos.x >= 0 && gridPos.x < mSize.x) && (gridPos.y >= 0 && gridPos.y < mSize.y) )
 	{
-		if ( (data.GridPos.x >= 0 && data.GridPos.x < mSize.x) && (data.GridPos.y >= 0 && data.GridPos.y < mSize.y) )
-		{
-			printf("あああ\n");
-			mStage->at(data.GridPos.y).at(data.GridPos.x).setBinary(data.bin);
-			mStage->at(data.GridPos.y).at(data.GridPos.x).setSprite(data.sprite);
-		}
+		//printf("あああ\n");
+		mStage->at(gridPos.y).at(gridPos.x).setBinary(bin);
+		mStage->at(gridPos.y).at(gridPos.x).setSprite(sprite);
 	}
+	
+	
 }
+
 
 
 //読み込みバイナリファイル名
-void Stage::setStage(ConfigData config)
+void Stage::setControl(std::shared_ptr<Control> control)
 {
-	if (Config.StageFileName != config.StageFileName)
+	if (control->sendData.isFileSelect == true)	//ファイルを読み込む
 	{
-//		printf("あああ\n");
-		mStage->clear();
-		Config.StageFileName = config.StageFileName;
-		ReadFile(Config.StageFileName);
+//		printf("うううう\n");
+
+	//	printf("%s\n",control->sendData.stageFileName.c_str());
+
+		ReadFile(control->sendData.stageFileName);
+
+		control->sendData.isFileSelect = false;
+
+//		printf("えええええ\n");
+
 	}
+	else if (control->sendData.isWriteCell == true)	//ステージに書き込む
+	{
+		//		printf("うううう\n");
+		printf("%d , %d \n", control->sendData.gridPos.x, control->sendData.gridPos.y);
+		WriteGrid(control->sendData.sprite, control->sendData.bin, control->sendData.gridPos);
+
+		control->sendData.isWriteCell = false;
+
+		//		printf("えええええ\n");
+
+	}
+	else if (control->sendData.isDelete == true)	//セルを削除
+	{
+		WriteGrid(0, 0x00, control->sendData.gridPos);
+
+		control->sendData.isDelete = false;
+
+	}
+	else if (control->sendData.isSave == true)	//保存
+	{
+		WriteFile(control->sendData.stageFileName);
+		control->sendData.isSave = false;
+	}
+	else if (control->sendData.isNewFile == true)	//新規作成
+	{
+		
+	//	printf("あああ\n");
+		New_File(control->sendData.stageFileName);
+
+		control->sendData.isNewFile = false;
+	}
+
+
+
+
+
 
 }
 
-//バイナリファイルに書き込む
-void Stage::setSaveFile(bool isSave)
-{
-	if (isSave == true)
-	{
-		WriteFile(Config.StageFileName);
-	}
-}
 
 
 //バイナリファイルにステージを書き込む
@@ -71,7 +120,7 @@ void Stage::WriteFile(std::string file)
 	fwrite(&mSize.x, sizeof(int), 1, fp);	//Xサイズ
 	fwrite(&mSize.y, sizeof(int), 1, fp);	//Yサイズ
 
-	//ステージを生成
+	//ステージに書き込む
 	for (int y = 0; y < mSize.y; y++)
 	{
 		for (int x = 0; x < mSize.x; x++)
@@ -82,6 +131,7 @@ void Stage::WriteFile(std::string file)
 	}
 
 	fclose(fp);		//ファイルクローズ
+
 }
 
 
@@ -89,16 +139,18 @@ void Stage::WriteFile(std::string file)
 void Stage::ReadFile(std::string file)
 {
 
-	printf("ファイル読み込み \n");
+	//printf("ファイル読み込み \n");
 
 	FILE* fp = NULL;
-	
-		//printf("FileName: %s\n", data.FileName.c_str());
-		fopen_s(&fp, file.c_str(), "rb");	//読み込みモードでバイナリファイルを開く
+	//printf("ｑｑｑｑｑｑｑ %s",file.c_str());
+
+	//printf("FileName: %s\n", data.FileName.c_str());
+	//fopen_s(&fp, "test.bin", "rb");	//読み込みモードでバイナリファイルを開く
+	fopen_s(&fp, file.c_str(), "rb");	//読み込みモードでバイナリファイルを開く
 		if (fp != NULL)
 		{
 
-		//	printf("ファイル読み込み aaa   \n");
+			printf("ファイル読み込み    \n");
 
 			//先頭８バイトはステージのサイズ
 			fread(&mSize.x, sizeof(int), 1, fp);
@@ -108,8 +160,7 @@ void Stage::ReadFile(std::string file)
 			printf("mSize.y: %d\n", mSize.y);
 
 
-			//ステージの境界線フレームを設定
-			
+			//ステージの境界線フレームを設定	
 			frame_up.start = glm::ivec2(-CELL,-CELL);
 			frame_up.end = glm::ivec2(mSize.x * CELL, 0);
 				
@@ -123,7 +174,6 @@ void Stage::ReadFile(std::string file)
 			frame_down.end = glm::ivec2(mSize.x * CELL, (mSize.y * CELL) + CELL);
 
 
-
 			std::vector<MapChip> map;
 			for (int y = 0; y < mSize.y; y++)
 			{
@@ -134,18 +184,22 @@ void Stage::ReadFile(std::string file)
 
 					byte b = 0;
 					fread(&b, sizeof(byte), 1, fp);							//バイナリファイルから１バイト読み込み
-
+//					printf("%d\n",b);
 					map.back().setBinary(b);								//バイナリを設定
 					map.back().setPosition(glm::ivec2(x * CELL, y * CELL));	//座標を設定
 
 					//オブジェクトが無い場合
-					if (b == 0x00) {
+					if (b == 0x00) 
+					{
 						map.back().setSprite(0);	//スプライトなし
 					}
 					else if (b > 0x00)
 					{
 						//オブジェクトがある場合
+						//printf("%d\n", SpriteList.size());
+						//printf("%d\n",b);
 						map.back().setSprite(SpriteList.at(b - 1).sprite);	//スプライトを設定
+
 					}
 				}
 				mStage->push_back(map);	//ステージに書き込む
@@ -156,6 +210,75 @@ void Stage::ReadFile(std::string file)
 		else {
 			printf("ファイルを読めません。");
 		}
+
+//		printf("iiiii\n");
+
+}
+
+//新しいバイナリファイルを作成するだけ
+void Stage::CreateNewFile(std::string name)
+{
+	FILE* fp = NULL;
+
+	printf("FileName: %s\n", name.c_str());
+	fopen_s(&fp, name.c_str(), "a+");
+
+	if (fp == NULL) {
+		printf("作成失敗\n");
+	}
+	else {
+		printf("ファイル作成\n");
+		fclose(fp);
+	}
+
+
+}
+
+//新規作成
+void Stage::New_File(std::string name)
+{
+	CreateNewFile(name);
+
+
+	//printf("X: %d\n", mSize.x);
+	//printf("Y: %d\n", mSize.y);
+
+	
+	FILE* fp = NULL;	//ファイルポインタ
+	fopen_s(&fp, name.c_str(), "wb");	//書き込み専用でバイナリファイルを開く
+
+	int xx = 100;
+	int yy = 100;
+
+	if (fp != NULL) 
+	{
+		//先頭８バイトはステージのサイズ
+		fwrite(&xx, sizeof(int), 1, fp);	//Xサイズ
+		fwrite(&yy, sizeof(int), 1, fp);	//Yサイズ
+
+		//ステージに書き込む
+		for (int y = 0; y < yy; y++)
+		{
+			for (int x = 0; x < xx; x++)
+			{
+				byte b = 0x00;
+				fwrite(&b, sizeof(byte), 1, fp);	//バイナリファイルに書き込む
+			}
+		}
+
+		fclose(fp);		//ファイルクローズ
+	}
+	
+}
+
+
+
+
+
+//初期化
+void Stage::SetUp()
+{
+
 }
 
 

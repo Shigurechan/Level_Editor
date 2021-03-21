@@ -49,16 +49,14 @@ void Entry::Update()
 {
 	InputKey->Update();
 
-	switch (Scene)	
+	switch (Scene)		
 	{
-
 		//初期化
 	case Scene_Type::SetUp:
 	{
 
-		Edit->SetUp();	//初期化
-
-		Scene = Scene_Type::Edit;
+		Edit->SetUp();					//更新
+		Scene = Edit->getSceneType();	//シーン推移
 	}break;
 
 		//エディット

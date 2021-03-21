@@ -23,7 +23,11 @@ Edit_Scene::Edit_Scene(Scene_Type t, Entry* e) : Scene_base(t, e)
 //初期化
 void Edit_Scene::SetUp()
 {
-	stage->setMapChip(control->getMapChip());
+	stage->SetUp();
+	stage->setMapChip(control->getSpriteData());	//スプライトデータを読み込み
+	//printf("さああ\n");
+
+	Type = Scene_Type::Edit;
 }
 
 
@@ -33,10 +37,8 @@ void Edit_Scene::Update()
 
 
 
-	stage->setStage(control->getConfig());								//設定ファイルを書き込む
-	stage->WriteGrid(control->getWriteData(),control->isWrite_cell);	//ステージに書き込む
-	stage->setSaveFile(control->isSave);								//ファイルをセーブ
-
+	stage->setControl(control);
+	
 
 	control->Update();	//更新
 	stage->Update();	//更新

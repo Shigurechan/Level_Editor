@@ -37,15 +37,22 @@ public:
 	void Update();		//計算
 	void Draw();		//描画
 
+
+
+	
 	void setGrid(MapChip chip, glm::ivec2 screen_grid);	//グリッドに書き込む
 	void setMapChip(std::vector<SpriteData> data);		//マップチップデータを取得
 	void WriteFile(std::string file);					//バイナリファイルにステージを書き込む
 	void ReadFile(std::string file);					//バイナリファイルを読み込む
-	void setSaveFile(bool isSave);
+	void New_File(std::string name);					//ステージファイルを新規作成
+	void CreateNewFile(std::string name);				//ファイルを作成する
+
 	void Scroll(std::shared_ptr<Control> control);		//スクロールする向き
-	void setStage(ConfigData config);					//コンフィグデータを取得
-	void SetUp();										//フォルダからステージを読み込む
-	void WriteGrid(WriteData data,bool flag);			//ステージに書き込むかどうか？
+
+	void setControl(std::shared_ptr<Control> control);	//コントロールからデータを受け取る。
+
+	void SetUp();												//フォルダからステージを読み込む
+	void WriteGrid(int sprite, byte bin,glm::ivec2 gridPos);	//ステージに書き込むかどうか？
 
 
 
@@ -64,8 +71,7 @@ private:
 	Entry* Owner;
 	
 	std::vector<std::string> FileNameList;	//ファイルリスト
-	ConfigData Config;	//コンフィグ
-
+	
 
 
 

@@ -13,29 +13,18 @@ Control::Control(Entry* e)
 
 	Owner = e;				//Entry クラス
 
-//	printf("X %d\n", SCREEN_WIDTH / CELL);
-//	printf("Y %d\n",SCREEN_HEIGHT / CELL);
+	//マップチップ選択
+	chipMenu = std::make_shared<Window>(Owner,Window_Scene::ChipSelect,glm::ivec2(100,100), glm::ivec2(200, 200));
+	chipMenu->setTitle("マップチップを選択",GetColor(0,0,0));
 
 
-	
-	// チップ選択
-	Chip_Menu = std::make_shared<Window>(Owner, Window_Scene::ChipSelect, glm::ivec2(100, 100), glm::ivec2(300, 300));
-	Chip_Menu->setTitle("マップチップを選択", GetColor(0, 0, 0));
-
-	//ステージ選択
-	Stage_Menu = std::make_shared<Window>(Owner, Window_Scene::StageSelect, glm::ivec2(100, 100), glm::ivec2(300, 300));
-	Stage_Menu->setTitle("マップを選択", GetColor(0, 0, 0));
-
-	ChipData.GridPos = glm::ivec2(0,0);
-
-
-	GridPos = glm::ivec2(13,9);			//グリッド座標
+	GridPos = glm::ivec2(13,9);	//グリッド座標
 	Screen_GridPos = GridPos;	//スクリーン座標
 
 	// ################ マップチップをロード　################ 
-	std::string filename = "\\Assets\\Sprite";	//バイナリファイルの格納ディレクトリ
+	std::string filename = "MapChip";	//バイナリファイルの格納ディレクトリ
 	std::string path = fs::current_path().string();
-	path = path + filename;
+	path = path + "\\" + filename;
 	
 	if (fs::exists(path) == false)
 	{
@@ -44,7 +33,7 @@ Control::Control(Entry* e)
 	}
 	else
 	{
-		int a = 0;
+		int num = 0;
 		printf("マップチップをファイルをロード\n");
 		for (fs::directory_iterator itr = fs::directory_iterator(path); itr != fs::directory_iterator(); itr++)
 		{
@@ -88,60 +77,32 @@ Control::Control(Entry* e)
 			SpriteList.push_back(data);	//マップチップ情報を設定
 
 			//ファイルリスト
-			Chip_Menu->AddList_Down(Window_Scene::None, data.name, a, GetColor(0, 0, 0), GetColor(255,255,255));	//メニュー
-			a++;
+			chipMenu->AddList_Down(Window_Scene::None, data.name, num, GetColor(0, 0, 0),GetColor(255, 255, 255),0);
+			num++;
 
 		}
 		printf("\n\n");
 	}
 	// ################ 　################ 
-
-
-	// ################ ステージをロード　################ 
-	filename = "\\Stage_Data";	//バイナリファイルの格納ディレクトリ
-	path = fs::current_path().string();
-	path = path + filename;
-	if (fs::exists(path) == false)
-	{
-		printf("Stage_Dataフォルダが存在しないため新規作成しました。\n");
-		fs::create_directory(path);
-	}
-	else
-	{
-		printf("バイナリファイルをロード\n");
-		int a = 0;
-		for (fs::directory_iterator itr = fs::directory_iterator(path); itr != fs::directory_iterator(); itr++)
-		{
-			printf("%s\n", itr->path().string().c_str());
-			StageFileNameList.push_back(itr->path().string());
-			Stage_Menu->AddList_Down(Window_Scene::None, itr->path().filename().string(), a, GetColor(0, 0, 0), GetColor(255, 255, 255));	//ウインドウ
-
-
-			a++;
-		}
-		printf("\n\n");
-	}
-	// ################ 　################ 
-
 
 	//長押し
 	HoldKey_X = false;
 	HoldKey_Y = false;
 	
-	isWrite_cell = false;	//書き込むかどうか？
-	isSave = false;		//ファイルにセーブするかどうか？
-
-	mVector = VECTOR_LEFT;
-
-	ChipData.bin = SpriteList.at(0).bin;			//バイナリ
-	ChipData.sprite = SpriteList.at(0).sprite;	//スプライト
+	mVector = VECTOR_LEFT;	//方向
 
 
-	// メニュー画面
-	isChipSelect = false;	//チップ選択
-	isStageSelect = true;	//ステージ選択
-	isChangeSize = false;	//サイズ選択
-	isSave = false;			//セーブする
+
+
+	//メニュー切り替え
+	isMenu = false;	//メニュー
+
+	isStart = false;			//スタート画面
+	isFileSelect = false;		//ファイル切り替え
+	isStageResize = false;		//ステージサイズをリサイズ
+	isMapChipSelect = false;		//マップチップを切り替え
+	isNewFile = false;			//新しいファイルを作成
+
 
 }
 
@@ -151,6 +112,11 @@ void Control::SetUp()
 	
 }
 
+//スプライトデータを取得
+std::vector<SpriteData> Control::getSpriteData()
+{
+	return SpriteList;
+}
 
 //向き
 glm::ivec2 Control::getVector()
@@ -159,55 +125,24 @@ glm::ivec2 Control::getVector()
 }
 
 //メニュー更新
-void Control::MenuUpdate() 
+void Control::MenuUpdate()
 {
-	//ステージ選択
-	if (isStageSelect == true) 
+	if (isMapChipSelect == true)
 	{
-		Stage_Menu->Update();
-		if (Stage_Menu->getChangeScene() != Window_Scene::Invalid)
+		chipMenu->Update();
+		if (chipMenu->getChangeScene() != Window_Scene::Invalid)
 		{
-			Config.StageFileName = StageFileNameList.at(Stage_Menu->getItem());	//コンフィグデータにステージ名を設定		
-			Stage_Menu->Reset();
-			isStageSelect = false;
-		}
-	}
-	else if (isChipSelect == true)
-	{
-		// チップ選択
-		Chip_Menu->Update();
+			sendData.sprite = SpriteList.at((int)chipMenu->getItem()).sprite;	//スプライト
+			sendData.bin = SpriteList.at((int)chipMenu->getItem()).bin;			//バイナリ
 
-		if (Chip_Menu->getChangeScene() != Window_Scene::Invalid)
-		{
-			ChipData.bin = SpriteList.at(Chip_Menu->getItem()).bin;			//バイナリ
-			ChipData.sprite = SpriteList.at(Chip_Menu->getItem()).sprite;	//スプライト
-			//ChipData.GridPos = GridPos;										//座標
-
-			Chip_Menu->Reset();
-			isChipSelect = false;
+			chipMenu->Reset();	//リセット
+			isMapChipSelect = false;
 		}
 	}
 
+	
 
 
-
-
-
-
-
-}
-
-//コンフィグデータを取得
-ConfigData Control::getConfig()
-{
-	return Config;
-}
-
-
-//マップチップを取得
-std::vector<SpriteData> Control::getMapChip()
-{
-	return SpriteList;
 }
 
 
@@ -215,19 +150,11 @@ std::vector<SpriteData> Control::getMapChip()
 //メニュー描画
 void Control::MenuDraw()
 {
-	//ステージ選択
-	if (isStageSelect == true) 
+	if (isMapChipSelect == true)
 	{
-		Stage_Menu->Draw();
+		chipMenu->Draw();
 	}
-	else if (isChipSelect == true)
-	{
-		// チップ選択
-		Chip_Menu->Draw();
-	}
-
-
-
+	
 }
 
 
@@ -241,26 +168,26 @@ void Control::Update()
 #define HOLD_TIME 30	//長押ししてから反応するまでの時間
 
 	//メニュー画面を開く
-	if (Owner->InputKey->getKeyDown(KEY_INPUT_C) == true) 
+	if (Owner->InputKey->getKeyDown(KEY_INPUT_C) == true) //マップチップを選択
 	{
-		isChipSelect = !isChipSelect;
+		isMapChipSelect = !isMapChipSelect;
 	}
-	else if (Owner->InputKey->getKeyDown(KEY_INPUT_M) == true)
+	else if (Owner->InputKey->getKeyDown(KEY_INPUT_M) == true)	//ステージファイルを選択
 	{
-		isStageSelect = !isStageSelect;
+		isFileSelect = !isFileSelect;
 	}
-	else if (Owner->InputKey->getKeyDown(KEY_INPUT_S) == true)
+	else if (Owner->InputKey->getKeyDown(KEY_INPUT_S) == true)	//サイズを変更
 	{
-		isChangeSize = !isChangeSize;
+		isStageResize = !isStageResize;
 	}
-
-	//P キーで保存
-	if (Owner->InputKey->getKeyDown(KEY_INPUT_P) == true)
+	else if (Owner->InputKey->getKeyDown(KEY_INPUT_P) == true)	//保存
 	{
-		isSave = true;
+		
+		sendData.isSave = true;
 	}
-	else {
-		isSave = false;
+	else 
+	{
+		
 	}
 
 
@@ -268,122 +195,115 @@ void Control::Update()
 
 
 	//エディタ操作
-	if (isChipSelect == false && isChangeSize == false && isStageSelect == false)
+	
+	//Left Right
+	if (Owner->InputKey->getKeyDownHold(KEY_INPUT_LEFT) > 0)
 	{
-		//Left Right
-		if (Owner->InputKey->getKeyDownHold(KEY_INPUT_LEFT) > 0)
+		//長押し
+		if (HoldKey_X == false)
 		{
-			//長押し
-			if (HoldKey_X == false)
-			{
-				GridPos.x += -1;		//ステージ座標
-				Screen_GridPos.x += -1;	//スクリーン座標
-				HoldKey_X = true;		//長押し
-				mVector = VECTOR_LEFT;	//方向
-			}
-			else {
-				if (Owner->InputKey->getKeyDownHold(KEY_INPUT_LEFT) > HOLD_TIME)
-				{
-					HoldKey_X = false;	//長押し
-				}
-			}
-		}
-		else if (Owner->InputKey->getKeyDownHold(KEY_INPUT_RIGHT) > 0)
-		{
-			//長押し
-			if (HoldKey_X == false)
-			{
-				GridPos.x += 1;			//ステージ座標
-				Screen_GridPos.x += 1;	//スクリーン座標
-				HoldKey_X = true;		//長押し
-				mVector = VECTOR_RIGHT;	//方向
-
-			}
-			else {
-				if (Owner->InputKey->getKeyDownHold(KEY_INPUT_RIGHT) > HOLD_TIME)
-				{
-					HoldKey_X = false;	//長押し
-				}
-			}
+			GridPos.x += -1;		//ステージ座標
+			Screen_GridPos.x += -1;	//スクリーン座標
+			HoldKey_X = true;		//長押し
+			mVector = VECTOR_LEFT;	//方向
 		}
 		else {
-			HoldKey_X = false;	//長押し
-
-			mVector = glm::ivec2(0, 0);	//方向なし
-		}
-
-
-		//Up Down
-		if (Owner->InputKey->getKeyDownHold(KEY_INPUT_UP) > 0)
-		{
-			//長押し
-			if (HoldKey_Y == false)
+			if (Owner->InputKey->getKeyDownHold(KEY_INPUT_LEFT) > HOLD_TIME)
 			{
-				GridPos.y += -1;		//ステージ座標
-				Screen_GridPos.y += -1;	//スクリーン座標
-				HoldKey_Y = true;		//長押し
-				mVector = VECTOR_UP;	//方向
-
-			}
-			else {
-				if (Owner->InputKey->getKeyDownHold(KEY_INPUT_UP) > HOLD_TIME)
-				{
-					HoldKey_Y = false;	//長押し
-				}
+				HoldKey_X = false;	//長押し
 			}
 		}
-		else if (Owner->InputKey->getKeyDownHold(KEY_INPUT_DOWN) > 0)
+	}
+	else if (Owner->InputKey->getKeyDownHold(KEY_INPUT_RIGHT) > 0)
+	{
+		//長押し
+		if (HoldKey_X == false)
 		{
-			//長押し
-			if (HoldKey_Y == false)
-			{
-				GridPos.y += 1;			//ステージ座標
-				Screen_GridPos.y += 1;	//スクリーン座標
-				HoldKey_Y = true;		//長押し
-				mVector = VECTOR_DOWN;	//方向
+			GridPos.x += 1;			//ステージ座標
+			Screen_GridPos.x += 1;	//スクリーン座標
+			HoldKey_X = true;		//長押し
+			mVector = VECTOR_RIGHT;	//方向
 
-			}
-			else {
-				if (Owner->InputKey->getKeyDownHold(KEY_INPUT_DOWN) > HOLD_TIME)
-				{
-					HoldKey_Y = false;	//長押し
-				}
-			}
 		}
 		else {
-			HoldKey_Y = false;	//長押し
+			if (Owner->InputKey->getKeyDownHold(KEY_INPUT_RIGHT) > HOLD_TIME)
+			{
+				HoldKey_X = false;	//長押し
+			}
+		}
+	}
+	else {
+		HoldKey_X = false;	//長押し
+
+		mVector = glm::ivec2(0, 0);	//方向なし
+	}
+
+
+	//Up Down
+	if (Owner->InputKey->getKeyDownHold(KEY_INPUT_UP) > 0)
+	{
+		//長押し
+		if (HoldKey_Y == false)
+		{
+			GridPos.y += -1;		//ステージ座標
+			Screen_GridPos.y += -1;	//スクリーン座標
+			HoldKey_Y = true;		//長押し
+			mVector = VECTOR_UP;	//方向
 
 		}
+		else {
+			if (Owner->InputKey->getKeyDownHold(KEY_INPUT_UP) > HOLD_TIME)
+			{
+				HoldKey_Y = false;	//長押し
+			}
+		}
+	}
+	else if (Owner->InputKey->getKeyDownHold(KEY_INPUT_DOWN) > 0)
+	{
+		//長押し
+		if (HoldKey_Y == false)
+		{
+			GridPos.y += 1;			//ステージ座標
+			Screen_GridPos.y += 1;	//スクリーン座標
+			HoldKey_Y = true;		//長押し
+			mVector = VECTOR_DOWN;	//方向
 
+		}
+		else {
+			if (Owner->InputKey->getKeyDownHold(KEY_INPUT_DOWN) > HOLD_TIME)
+			{
+				HoldKey_Y = false;	//長押し
+			}
+		}
+	}
+	else {
+		HoldKey_Y = false;	//長押し
 
+	}
+
+		
 
 	
-		//スペースキーで書き込む
-		if (Owner->InputKey->getKeyDown(KEY_INPUT_SPACE) == true)
-		{
-			ChipData.GridPos = GridPos;	//グリッド座標
+	//スペースキーで書き込む
+	if (Owner->InputKey->getKeyDown(KEY_INPUT_SPACE) == true)
+	{		
+		sendData.isWriteCell = true;	//ステージに書き込む
+		sendData.gridPos = GridPos;		//グリッド座標を設定
+	} 
+		
 
-			isWrite_cell = true;	//ステージに書き込む
-		}
-		else {
-			isWrite_cell = false;	//ステージ書き込まない
-		}
-
-
-		//ステージの書き込みを消す
-		if (Owner->InputKey->getKeyDown(KEY_INPUT_DELETE) == true)
-		{
-			
-			//isWrite_cell = true;	//ステージに書き込む
-		}
-
-	}
-	else
+	//ステージの書き込みを消す
+	if (Owner->InputKey->getKeyDown(KEY_INPUT_DELETE) == true)
 	{
-		MenuUpdate();
+		sendData.isDelete = true;
+		sendData.gridPos = GridPos;		//グリッド座標を設定
+
 	}
+		
+	
+	
 
-
+	MenuUpdate();
 
 
 	
@@ -408,11 +328,6 @@ void Control::setScreenGridPos(glm::ivec2 p)
 	Screen_GridPos = p;
 }
 
-//書き込みデータを取得
-WriteData Control::getWriteData()
-{
-	return ChipData;
-}
 
 
 //グリッド座標を設定
@@ -426,7 +341,7 @@ void Control::Draw()
 {
 	
 
-	if (isChipSelect == false && isChangeSize == false && isStageSelect == false)
+	if (isMapChipSelect == false && isFileSelect == false && isStageResize == false)
 	{
 		//矩形描画
 		if (Fps::getFrame() % 15 == 0)
@@ -441,16 +356,10 @@ void Control::Draw()
 	}
 	else {
 
-		MenuDraw();
+		//printf("あああ\n");
+		MenuDraw();	//メニュー描画
 	}
 
-
-	//セーブ表示
-	if (isSave == true)
-	{
-		DrawFormatString(0,0, GetColor(255, 255, 255), "SAVED");
-
-	}
 
 
 

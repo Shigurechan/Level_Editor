@@ -42,17 +42,12 @@ public:
 	glm::ivec2 getGridPos();		//グリッド座標を取得
 	glm::ivec2 getVector();			//向き
 	glm::ivec2 getScreenGridPos();	//スクリーンのグリッド座標を取得
-	ConfigData getConfig();			//コンフィグデータを取得
-	std::vector<SpriteData> getMapChip();	//マップチップを取得
-	WriteData getWriteData();	//書き込みデータを取得
+	std::vector<SpriteData> getSpriteData();	//スプライトデータ
 
 
 
 
-
-	
-	bool isWrite_cell;	//ステージ情報をバイナリファイルに書き込むかどうか？
-	bool isSave;		//セーブする
+	EditData sendData;	//送信データ
 
 private:
 
@@ -65,12 +60,9 @@ private:
 	glm::ivec2 ScrollMove;		//スクロールする向き
 	glm::ivec2 mVector;			//向き
 
+	int writeSprite;	//選択中のスプライト
 
-
-	//送信データ
-	WriteData ChipData;	//書き込むデータ
-	ConfigData Config;	//コンフィグ
-
+	
 
 
 
@@ -86,21 +78,30 @@ private:
 
 	//　メニュー関係
 
-	bool isChipSelect;	//マップチップを選択	
-	bool isStageSelect;	//ステージを選択
-	bool isChangeSize;	//ステージの大きさを変更
 	
 
 
-
-	std::shared_ptr<Window> Chip_Menu;	//チップ選択画面
-	std::shared_ptr<Window> Stage_Menu;	//ステージ選択画面
-
+	std::shared_ptr<Window> chipMenu;	//チップ選択画面
+	std::shared_ptr<Window> stageMenu;	//ステージ選択画面
 
 
 
+	//操作
+	bool isWriteCell;		//書き込み
+	bool isSave;			//保存
+	bool isDelete;			//削除
 
 
+
+	//メニュー画面
+
+	bool isMenu;	//メニュー
+
+	bool isFileSelect;		//ファイル切り替え
+	bool isStageResize;		//ステージサイズをリサイズ
+	bool isMapChipSelect;	//マップチップを切り替え
+	bool isNewFile;			//新しいファイルを作成
+	bool isStart;			//スタート画面
 
 
 	//長押し

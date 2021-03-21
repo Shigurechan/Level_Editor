@@ -165,10 +165,7 @@ std::vector<std::string> Window::getInputKeyData()
 	//キー入力文字列をベクター変数に入れる。
 	for (std::vector<List_Item>::iterator itr = lists.begin(); itr != lists.end(); itr++)
 	{
-		if (itr->isInput_Number == true || itr->isInput_String == true) 
-		{
-			tmp.push_back(itr->InputKeyData);
-		}
+		tmp.push_back(itr->InputKeyData);
 	}
 
 	return tmp;
@@ -258,7 +255,7 @@ void Window::Draw()
 				DrawBox(itr->pos.x, itr->pos.y, itr->pos.x + itr->size.x, itr->pos.y + 16, itr->Back_Color, true);	//背景
 			}
 
-			DrawFormatString(itr->pos.x + itr->size.x, itr->pos.y, itr->Fore_Color, "%s", itr->InputKeyData);	//入力文字
+			DrawFormatString(itr->pos.x + itr->size.x, itr->pos.y, itr->Fore_Color, "%s", itr->InputKeyData.c_str());	//入力文字
 
 			DrawFormatString(itr->pos.x, itr->pos.y, itr->Fore_Color, "%s", itr->name.c_str());			//前景
 		}
@@ -266,7 +263,7 @@ void Window::Draw()
 			DrawBox(itr->pos.x, itr->pos.y, itr->pos.x + itr->size.x, itr->pos.y + 16, itr->Back_Color, true);	//背景
 			DrawFormatString(itr->pos.x, itr->pos.y, itr->Fore_Color, "%s", itr->name.c_str());			//前景
 
-			DrawFormatString(itr->pos.x + itr->size.x, itr->pos.y, itr->Fore_Color, "%s", itr->InputKeyData);//入力文字
+			DrawFormatString(itr->pos.x + itr->size.x, itr->pos.y, itr->Fore_Color, "%s", itr->InputKeyData.c_str());//入力文字
 
 		}
 	}
