@@ -21,6 +21,12 @@ Control::Control(Entry* e)
 	GridPos = glm::ivec2(13,9);	//グリッド座標
 	Screen_GridPos = GridPos;	//スクリーン座標
 
+	//マウス座標
+	mouseScreenPosition = glm::ivec2(0,0);	//スクリーン座標
+	prevPos = glm::ivec2(0, 0);				//マウス座標
+	prevPosGrid = glm::ivec2(0,0);			//前のグリッド座標
+
+
 	// ################ マップチップをロード　################ 
 	std::string filename = "MapChip";	//バイナリファイルの格納ディレクトリ
 	std::string path = fs::current_path().string();
@@ -192,114 +198,188 @@ void Control::Update()
 
 
 
+//	printf("あああああ %s\n",Owner->GetDragPath().c_str());
 
 
-	//エディタ操作
-	
-	//Left Right
-	if (Owner->InputKey->getKeyDownHold(KEY_INPUT_LEFT) > 0)
+	if (Owner->GetDragPath().size() == 0)
 	{
-		//長押し
-		if (HoldKey_X == false)
+		sendData.isNewFile = true;
+		sendData.stageFileName = "abc.bin";
+		
+	}
+	else {
+	//	printf("あああ\n");
+		if (isDrag == false) 
+		{
+			sendData.isNewFile = false;							//新しいファイルではない
+			sendData.stageFileName = Owner->GetDragPath();		//ドラックしたパスを設定
+			sendData.isFileSelect = true;						//ファイルを選択するモードに移行
+
+			isDrag = true;
+		}
+		
+	}
+
+
+
+
+
+	//マウス操作
+	
+
+//	glm::ivec2 vec;	//方向
+	GetMousePoint(&mouseScreenPosition.x,&mouseScreenPosition.y);	//マウス座標を取得
+
+	if (prevPos != mouseScreenPosition)
+	{
+		//printf("%d , %d \n", pos.x, pos.y);
+
+		Screen_GridPos = mouseScreenPosition / CELL;	//スクリーン座標
+
+
+		if (Screen_GridPos.x > prevPosGrid.x)
+		{
+			GridPos.x += 1;		//ステージ座標
+		}
+		else if (Screen_GridPos.x < prevPosGrid.x)
 		{
 			GridPos.x += -1;		//ステージ座標
-			Screen_GridPos.x += -1;	//スクリーン座標
-			HoldKey_X = true;		//長押し
-			mVector = VECTOR_LEFT;	//方向
 		}
-		else {
-			if (Owner->InputKey->getKeyDownHold(KEY_INPUT_LEFT) > HOLD_TIME)
-			{
-				HoldKey_X = false;	//長押し
-			}
-		}
-	}
-	else if (Owner->InputKey->getKeyDownHold(KEY_INPUT_RIGHT) > 0)
-	{
-		//長押し
-		if (HoldKey_X == false)
+
+		if (Screen_GridPos.y > prevPosGrid.y)
 		{
-			GridPos.x += 1;			//ステージ座標
-			Screen_GridPos.x += 1;	//スクリーン座標
-			HoldKey_X = true;		//長押し
-			mVector = VECTOR_RIGHT;	//方向
-
+			GridPos.y += 1;		//ステージ座標
 		}
-		else {
-			if (Owner->InputKey->getKeyDownHold(KEY_INPUT_RIGHT) > HOLD_TIME)
-			{
-				HoldKey_X = false;	//長押し
-			}
-		}
-	}
-	else {
-		HoldKey_X = false;	//長押し
-
-		mVector = glm::ivec2(0, 0);	//方向なし
-	}
-
-
-	//Up Down
-	if (Owner->InputKey->getKeyDownHold(KEY_INPUT_UP) > 0)
-	{
-		//長押し
-		if (HoldKey_Y == false)
+		else if (Screen_GridPos.y < prevPosGrid.y)
 		{
 			GridPos.y += -1;		//ステージ座標
-			Screen_GridPos.y += -1;	//スクリーン座標
-			HoldKey_Y = true;		//長押し
-			mVector = VECTOR_UP;	//方向
+		}
 
-		}
-		else {
-			if (Owner->InputKey->getKeyDownHold(KEY_INPUT_UP) > HOLD_TIME)
-			{
-				HoldKey_Y = false;	//長押し
-			}
-		}
-	}
-	else if (Owner->InputKey->getKeyDownHold(KEY_INPUT_DOWN) > 0)
-	{
-		//長押し
-		if (HoldKey_Y == false)
+
+
+		//左クリックで書き込み
+		if ((GetMouseInput() & MOUSE_INPUT_LEFT) != 0)
 		{
-			GridPos.y += 1;			//ステージ座標
-			Screen_GridPos.y += 1;	//スクリーン座標
-			HoldKey_Y = true;		//長押し
-			mVector = VECTOR_DOWN;	//方向
-
+			printf("左クリック\n");
+			sendData.isWriteCell = true;	//ステージに書き込む
+			sendData.gridPos = GridPos;		//グリッド座標を設定
 		}
-		else {
-			if (Owner->InputKey->getKeyDownHold(KEY_INPUT_DOWN) > HOLD_TIME)
+
+
+
+
+	}else
+	{
+		//キーボード操作　エディタ操作	
+		//Left Right
+		if (Owner->InputKey->getKeyDownHold(KEY_INPUT_LEFT) > 0)
+		{
+			//長押し
+			if (HoldKey_X == false)
 			{
-				HoldKey_Y = false;	//長押し
+				GridPos.x += -1;		//ステージ座標
+				Screen_GridPos.x += -1;	//スクリーン座標
+				HoldKey_X = true;		//長押し
+				mVector = VECTOR_LEFT;	//方向
+			}
+			else {
+				if (Owner->InputKey->getKeyDownHold(KEY_INPUT_LEFT) > HOLD_TIME)
+				{
+					HoldKey_X = false;	//長押し
+				}
 			}
 		}
-	}
-	else {
-		HoldKey_Y = false;	//長押し
+		else if (Owner->InputKey->getKeyDownHold(KEY_INPUT_RIGHT) > 0)
+		{
+			//長押し
+			if (HoldKey_X == false)
+			{
+				GridPos.x += 1;			//ステージ座標
+				Screen_GridPos.x += 1;	//スクリーン座標
+				HoldKey_X = true;		//長押し
+				mVector = VECTOR_RIGHT;	//方向
+
+			}
+			else {
+				if (Owner->InputKey->getKeyDownHold(KEY_INPUT_RIGHT) > HOLD_TIME)
+				{
+					HoldKey_X = false;	//長押し
+				}
+			}
+		}
+		else {
+			HoldKey_X = false;	//長押し
+
+			mVector = glm::ivec2(0, 0);	//方向なし
+		}
+
+
+		//Up Down
+		if (Owner->InputKey->getKeyDownHold(KEY_INPUT_UP) > 0)
+		{
+			//長押し
+			if (HoldKey_Y == false)
+			{
+				GridPos.y += -1;		//ステージ座標
+				Screen_GridPos.y += -1;	//スクリーン座標
+				HoldKey_Y = true;		//長押し
+				mVector = VECTOR_UP;	//方向
+
+			}
+			else {
+				if (Owner->InputKey->getKeyDownHold(KEY_INPUT_UP) > HOLD_TIME)
+				{
+					HoldKey_Y = false;	//長押し
+				}
+			}
+		}
+		else if (Owner->InputKey->getKeyDownHold(KEY_INPUT_DOWN) > 0)
+		{
+			//長押し
+			if (HoldKey_Y == false)
+			{
+				GridPos.y += 1;			//ステージ座標
+				Screen_GridPos.y += 1;	//スクリーン座標
+				HoldKey_Y = true;		//長押し
+				mVector = VECTOR_DOWN;	//方向
+
+			}
+			else {
+				if (Owner->InputKey->getKeyDownHold(KEY_INPUT_DOWN) > HOLD_TIME)
+				{
+					HoldKey_Y = false;	//長押し
+				}
+			}
+		}
+		else {
+			HoldKey_Y = false;	//長押し
+
+		}
+
+
+		//スペースキーで書き込む
+		if (Owner->InputKey->getKeyDown(KEY_INPUT_SPACE) == true)
+		{
+			sendData.isWriteCell = true;	//ステージに書き込む
+			sendData.gridPos = GridPos;		//グリッド座標を設定
+		}
+
+
+		//ステージの書き込みを消す
+		if (Owner->InputKey->getKeyDown(KEY_INPUT_DELETE) == true)
+		{
+			sendData.isDelete = true;
+			sendData.gridPos = GridPos;		//グリッド座標を設定
+		}
 
 	}
 
-		
+	//前の座標と前のグリッド座標
+	prevPosGrid = mouseScreenPosition / CELL;
+	prevPos = mouseScreenPosition;
 
-	
-	//スペースキーで書き込む
-	if (Owner->InputKey->getKeyDown(KEY_INPUT_SPACE) == true)
-	{		
-		sendData.isWriteCell = true;	//ステージに書き込む
-		sendData.gridPos = GridPos;		//グリッド座標を設定
-	} 
-		
 
-	//ステージの書き込みを消す
-	if (Owner->InputKey->getKeyDown(KEY_INPUT_DELETE) == true)
-	{
-		sendData.isDelete = true;
-		sendData.gridPos = GridPos;		//グリッド座標を設定
 
-	}
-		
 	
 	
 
@@ -351,6 +431,7 @@ void Control::Draw()
 
 		}
 
+
 		DrawFormatString(400, 0, GetColor(255, 255, 255), "GridPos: %d , %d ", GridPos.x, GridPos.y);
 		DrawFormatString(400, 32, GetColor(255, 255, 255), "Screen_GridPos: %d , %d ", Screen_GridPos.x, Screen_GridPos.y);
 	}
@@ -363,6 +444,7 @@ void Control::Draw()
 
 
 
+	DrawFormatString(Screen_GridPos.x * CELL, (Screen_GridPos.y * CELL) + CELL, GetColor(255, 255, 255), "%d , %d ", mouseScreenPosition.x, mouseScreenPosition.y);
 
 }
 

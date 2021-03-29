@@ -62,9 +62,12 @@ private:
 
 	int writeSprite;	//選択中のスプライト
 
-	
+	bool isDrag = false;	//ドラッグしたかどうか？
 
-
+	//マウス関係
+	glm::ivec2 prevPos;				// 前のマウス座標
+	glm::ivec2 prevPosGrid;			//前のグリッド座標
+	glm::ivec2 mouseScreenPosition;	//今の座標
 
 
 	std::shared_ptr<Animation> anim;	//カーソルアニメーション
